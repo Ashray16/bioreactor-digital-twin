@@ -8,7 +8,6 @@ interface EventLogProps {
 }
 
 export default function EventLog({ history, latestAction, activeFault }: EventLogProps) {
-  // Generate structured event items from historical data
   const events: Array<{ time: number; type: 'info' | 'warning' | 'control' | 'fault'; title: string; desc: string }> = [];
 
   if (history.length > 0) {
@@ -16,7 +15,7 @@ export default function EventLog({ history, latestAction, activeFault }: EventLo
       time: 0.0,
       type: 'info',
       title: 'Simulation Initialized',
-      desc: 'Digital twin state created with initial cell density 0.5 × 10⁸ cells/mL.',
+      desc: 'Digital twin state created with baseline cell density.',
     });
   }
 
@@ -69,46 +68,44 @@ export default function EventLog({ history, latestAction, activeFault }: EventLo
     });
   }
 
-  // Sort descending by time
   events.sort((a, b) => b.time - a.time);
 
   return (
-    <div className="glass-panel p-6 rounded-2xl border border-slate-800 space-y-4">
-      <div className="flex items-center justify-between border-b border-slate-800 pb-3">
-        <h3 className="text-sm font-bold text-white flex items-center gap-2 uppercase tracking-wider">
-          <List className="w-4 h-4 text-cyan-400" />
-          Real-Time Bioprocess Event Log
+    <div className="glass-panel p-6 rounded-xl border border-slate-200 space-y-4 bg-white">
+      <div className="flex items-center justify-between border-b border-slate-200 pb-3">
+        <h3 className="text-xs font-bold text-slate-900 flex items-center gap-2 uppercase tracking-wider">
+          <List className="w-4 h-4 text-blue-600" />
+          Real-Time Process Event Stream
         </h3>
-        <span className="text-[11px] font-mono text-slate-400">{events.length} Events</span>
+        <span className="text-[11px] font-mono text-slate-500">{events.length} Events</span>
       </div>
 
       <div className="space-y-2.5 max-h-72 overflow-y-auto pr-1">
         {events.map((ev, idx) => (
           <div
             key={idx}
-            className={`p-3 rounded-xl border text-xs flex items-start gap-3 transition ${
+            className={`p-3 rounded-lg border text-xs flex items-start gap-3 transition ${
               ev.type === 'control'
-                ? 'bg-cyan-950/40 border-cyan-500/30 text-cyan-200'
+                ? 'bg-blue-50 border-blue-200 text-blue-900'
                 : ev.type === 'warning'
-                ? 'bg-amber-950/40 border-amber-500/30 text-amber-200'
+                ? 'bg-amber-50 border-amber-200 text-amber-900'
                 : ev.type === 'fault'
-                ? 'bg-rose-950/40 border-rose-500/30 text-rose-200'
-                : 'bg-slate-900/60 border-slate-800 text-slate-300'
+                ? 'bg-red-50 border-red-200 text-red-900'
+                : 'bg-slate-50 border-slate-200 text-slate-700'
             }`}
           >
             <div className="mt-0.5">
-              {ev.type === 'control' && <ShieldCheck className="w-4 h-4 text-cyan-400" />}
-              {ev.type === 'warning' && <AlertTriangle className="w-4 h-4 text-amber-400" />}
-              {ev.type === 'fault' && <Zap className="w-4 h-4 text-rose-400" />}
-              {ev.type === 'info' && <CheckCircle2 className="w-4 h-4 text-emerald-400" />}
+              {ev.type === 'control' && <ShieldCheck className="w-4 h-4 text-blue-600" />}
+              {ev.type === 'warning' && <AlertTriangle className="w-4 h-4 text-amber-600" />}
+              {ev.type === 'fault' && <Zap className="w-4 h-4 text-red-600" />}
+              {ev.type === 'info' && <CheckCircle2 className="w-4 h-4 text-emerald-600" />}
             </div>
-
-            <div className="flex-1">
-              <div className="flex items-center justify-between">
-                <span className="font-bold">{ev.title}</span>
-                <span className="font-mono text-[10px] opacity-70">t = {ev.time.toFixed(1)} h</span>
+            <div className="flex-1 space-y-0.5">
+              <div className="flex justify-between items-center">
+                <span className="font-bold text-slate-900">{ev.title}</span>
+                <span className="font-mono text-[10px] text-slate-500 font-semibold">t={ev.time.toFixed(1)}h</span>
               </div>
-              <p className="mt-0.5 opacity-90 font-mono text-[11px]">{ev.desc}</p>
+              <p className="text-[11px] text-slate-600 font-sans">{ev.desc}</p>
             </div>
           </div>
         ))}

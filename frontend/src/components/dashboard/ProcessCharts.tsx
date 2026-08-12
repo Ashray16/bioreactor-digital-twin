@@ -1,13 +1,4 @@
-import {
-  ResponsiveContainer,
-  LineChart,
-  Line,
-  XAxis,
-  YAxis,
-  CartesianGrid,
-  Tooltip,
-  ReferenceLine,
-} from 'recharts';
+import { ResponsiveContainer, LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ReferenceLine } from 'recharts';
 import { SimulationHistoryItem } from '../../types/simulation';
 
 interface ProcessChartsProps {
@@ -15,167 +6,164 @@ interface ProcessChartsProps {
   targetCellDensity: number;
 }
 
-const CustomTooltip = ({ active, payload, label, unit }: any) => {
-  if (active && payload && payload.length) {
-    return (
-      <div className="bg-[#0B0F17]/95 border border-slate-700 p-2.5 rounded-xl shadow-xl text-xs font-sans">
-        <div className="font-mono text-cyan-400 font-bold mb-1">Time: {label} h</div>
-        {payload.map((entry: any, index: number) => (
-          <div key={`item-${index}`} className="flex items-center gap-2 text-slate-200">
-            <span className="w-2.5 h-2.5 rounded-full" style={{ backgroundColor: entry.color }}></span>
-            <span className="text-slate-400">{entry.name}:</span>
-            <span className="font-mono font-semibold">{entry.value} {unit}</span>
-          </div>
-        ))}
-      </div>
-    );
-  }
-  return null;
-};
-
 export default function ProcessCharts({ history, targetCellDensity }: ProcessChartsProps) {
-  const chartData = history.map((h) => ({
-    time: h.time,
-    viableDensity: Number((h.viable_cell_density / 1e8).toFixed(3)),
-    nonviableDensity: Number((h.nonviable_cell_density / 1e8).toFixed(3)),
-    viability: h.cell_viability,
-    nutrient: h.nutrient_concentration,
-    metabolite: h.metabolite_concentration,
-    perfusion: h.perfusion_rate,
-    fouling: h.fouling_index,
+  // Format history data for clean chart visualization
+  const formattedData = history.map((item) => ({
+    time: item.time,
+    viableDensity: Number((item.viable_cell_density / 1e6).toFixed(1)), // In Millions cells/mL
+    cellViability: item.cell_viability,
+    glucose: item.nutrient_concentration,
+    lactate: item.metabolite_concentration,
+    perfusionRate: item.perfusion_rate,
+    foulingIndex: item.fouling_index,
   }));
 
-  const targetScaled = Number((targetCellDensity / 1e8).toFixed(2));
+  const targetM = targetCellDensity / 1e6; // 100M cells/mL target
 
   return (
     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-      {/* 1. Cell Density vs Time */}
-      <div className="glass-panel p-4 rounded-2xl">
-        <div className="flex items-center justify-between mb-3">
-          <h3 className="text-xs font-bold text-cyan-400 uppercase tracking-wider">
-            Viable Cell Density vs Time
-          </h3>
-          <span className="text-[11px] font-mono text-slate-400">×10⁸ cells/mL</span>
+      {/* 1. Viable Cell Density Trajectory Chart */}
+      <div className="glass-panel p-5 rounded-xl border border-slate-200 space-y-3">
+        <div className="flex items-center justify-between border-b border-slate-100 pb-2">
+          <div>
+            <h3 className="text-xs font-bold text-slate-900 uppercase tracking-wider">
+              Viable Cell Density Trajectory
+            </h3>
+            <p className="text-[11px] text-slate-500">Biomass growth vs target threshold</p>
+          </div>
+          <span className="text-[10px] font-mono text-blue-700 bg-blue-50 border border-blue-200 px-1.5 py-0.5 rounded font-bold">
+            ×10⁶ cells/mL
+          </span>
         </div>
-        <div className="h-52 w-full">
+        <div className="h-56 w-full">
           <ResponsiveContainer width="100%" height="100%">
-            <LineChart data={chartData} margin={{ top: 5, right: 10, left: -20, bottom: 0 }}>
-              <CartesianGrid strokeDasharray="3 3" stroke="#1E293B" />
-              <XAxis dataKey="time" stroke="#64748B" tick={{ fontSize: 10 }} />
-              <YAxis stroke="#64748B" tick={{ fontSize: 10 }} domain={[0, 'auto']} />
-              <Tooltip content={<CustomTooltip unit="×10⁸ cells/mL" />} />
-              <ReferenceLine y={targetScaled} stroke="#00F0FF" strokeDasharray="5 5" label={{ value: 'Target Goal', fill: '#00F0FF', fontSize: 10 }} />
-              <Line type="monotone" dataKey="viableDensity" name="Viable Density" stroke="#00F0FF" strokeWidth={2} dot={false} isAnimationActive={false} />
-              <Line type="monotone" dataKey="nonviableDensity" name="Dead Density" stroke="#EF4444" strokeWidth={1.5} strokeDasharray="3 3" dot={false} isAnimationActive={false} />
+            <LineChart data={formattedData} margin={{ top: 5, right: 10, left: -20, bottom: 0 }}>
+              <CartesianGrid strokeDasharray="3 3" stroke="#F1F5F9" vertical={false} />
+              <XAxis dataKey="time" stroke="#94A3B8" tick={{ fontSize: 10 }} />
+              <YAxis stroke="#94A3B8" tick={{ fontSize: 10 }} domain={[0, 'dataMax + 20']} />
+              <Tooltip
+                contentStyle={{ backgroundColor: '#FFFFFF', borderColor: '#CBD5E1', borderRadius: '8px', fontSize: '11px' }}
+              />
+              <ReferenceLine y={targetM} stroke="#059669" strokeDasharray="4 4" label={{ value: `Target: ${targetM}M`, fill: '#059669', fontSize: 10, position: 'insideTopRight' }} />
+              <Line type="monotone" dataKey="viableDensity" name="Viable Density (M/mL)" stroke="#2563EB" strokeWidth={2.5} dot={false} activeDot={{ r: 4 }} />
             </LineChart>
           </ResponsiveContainer>
         </div>
       </div>
 
-      {/* 2. Viability vs Time */}
-      <div className="glass-panel p-4 rounded-2xl">
-        <div className="flex items-center justify-between mb-3">
-          <h3 className="text-xs font-bold text-indigo-400 uppercase tracking-wider">
-            Cell Viability vs Time
-          </h3>
-          <span className="text-[11px] font-mono text-slate-400">% Viable</span>
+      {/* 2. Substrate & Metabolite Mass Balance Chart */}
+      <div className="glass-panel p-5 rounded-xl border border-slate-200 space-y-3">
+        <div className="flex items-center justify-between border-b border-slate-100 pb-2">
+          <div>
+            <h3 className="text-xs font-bold text-slate-900 uppercase tracking-wider">
+              Substrate &amp; Metabolite Kinetics
+            </h3>
+            <p className="text-[11px] text-slate-500">Glucose (Nutrient) vs Lactate (Byproduct)</p>
+          </div>
+          <span className="text-[10px] font-mono text-slate-600 bg-slate-100 px-1.5 py-0.5 rounded font-bold">
+            g/L
+          </span>
         </div>
-        <div className="h-52 w-full">
+        <div className="h-56 w-full">
           <ResponsiveContainer width="100%" height="100%">
-            <LineChart data={chartData} margin={{ top: 5, right: 10, left: -20, bottom: 0 }}>
-              <CartesianGrid strokeDasharray="3 3" stroke="#1E293B" />
-              <XAxis dataKey="time" stroke="#64748B" tick={{ fontSize: 10 }} />
-              <YAxis stroke="#64748B" tick={{ fontSize: 10 }} domain={[60, 100]} />
-              <Tooltip content={<CustomTooltip unit="%" />} />
-              <ReferenceLine y={90} stroke="#10B981" strokeDasharray="3 3" />
-              <Line type="monotone" dataKey="viability" name="Viability" stroke="#6366F1" strokeWidth={2} dot={false} isAnimationActive={false} />
+            <LineChart data={formattedData} margin={{ top: 5, right: 10, left: -20, bottom: 0 }}>
+              <CartesianGrid strokeDasharray="3 3" stroke="#F1F5F9" vertical={false} />
+              <XAxis dataKey="time" stroke="#94A3B8" tick={{ fontSize: 10 }} />
+              <YAxis stroke="#94A3B8" tick={{ fontSize: 10 }} />
+              <Tooltip
+                contentStyle={{ backgroundColor: '#FFFFFF', borderColor: '#CBD5E1', borderRadius: '8px', fontSize: '11px' }}
+              />
+              <ReferenceLine y={1.5} stroke="#DC2626" strokeDasharray="3 3" label={{ value: 'Min Glucose (1.5g/L)', fill: '#DC2626', fontSize: 9 }} />
+              <ReferenceLine y={3.5} stroke="#D97706" strokeDasharray="3 3" label={{ value: 'Max Lactate (3.5g/L)', fill: '#D97706', fontSize: 9 }} />
+              <Line type="monotone" dataKey="glucose" name="Glucose (g/L)" stroke="#059669" strokeWidth={2} dot={false} />
+              <Line type="monotone" dataKey="lactate" name="Lactate (g/L)" stroke="#D97706" strokeWidth={2} dot={false} />
+              <Legend wrapperStyle={{ fontSize: 10 }} />
             </LineChart>
           </ResponsiveContainer>
         </div>
       </div>
 
-      {/* 3. Glucose vs Time */}
-      <div className="glass-panel p-4 rounded-2xl">
-        <div className="flex items-center justify-between mb-3">
-          <h3 className="text-xs font-bold text-emerald-400 uppercase tracking-wider">
-            Nutrient (Glucose) vs Time
-          </h3>
-          <span className="text-[11px] font-mono text-slate-400">g/L</span>
+      {/* 3. Cell Viability % Chart */}
+      <div className="glass-panel p-5 rounded-xl border border-slate-200 space-y-3">
+        <div className="flex items-center justify-between border-b border-slate-100 pb-2">
+          <div>
+            <h3 className="text-xs font-bold text-slate-900 uppercase tracking-wider">
+              Cell Culture Viability
+            </h3>
+            <p className="text-[11px] text-slate-500">Percentage of living cell population</p>
+          </div>
+          <span className="text-[10px] font-mono text-emerald-700 bg-emerald-50 border border-emerald-200 px-1.5 py-0.5 rounded font-bold">
+            %
+          </span>
         </div>
-        <div className="h-52 w-full">
+        <div className="h-56 w-full">
           <ResponsiveContainer width="100%" height="100%">
-            <LineChart data={chartData} margin={{ top: 5, right: 10, left: -20, bottom: 0 }}>
-              <CartesianGrid strokeDasharray="3 3" stroke="#1E293B" />
-              <XAxis dataKey="time" stroke="#64748B" tick={{ fontSize: 10 }} />
-              <YAxis stroke="#64748B" tick={{ fontSize: 10 }} domain={[0, 'auto']} />
-              <Tooltip content={<CustomTooltip unit="g/L" />} />
-              <ReferenceLine y={1.5} stroke="#F59E0B" strokeDasharray="4 4" label={{ value: 'Min Limit', fill: '#F59E0B', fontSize: 10 }} />
-              <Line type="monotone" dataKey="nutrient" name="Glucose" stroke="#10B981" strokeWidth={2} dot={false} isAnimationActive={false} />
+            <LineChart data={formattedData} margin={{ top: 5, right: 10, left: -20, bottom: 0 }}>
+              <CartesianGrid strokeDasharray="3 3" stroke="#F1F5F9" vertical={false} />
+              <XAxis dataKey="time" stroke="#94A3B8" tick={{ fontSize: 10 }} />
+              <YAxis stroke="#94A3B8" tick={{ fontSize: 10 }} domain={[50, 100]} />
+              <Tooltip
+                contentStyle={{ backgroundColor: '#FFFFFF', borderColor: '#CBD5E1', borderRadius: '8px', fontSize: '11px' }}
+              />
+              <ReferenceLine y={90} stroke="#D97706" strokeDasharray="3 3" label={{ value: 'Viability Threshold (90%)', fill: '#D97706', fontSize: 9 }} />
+              <Line type="monotone" dataKey="cellViability" name="Viability %" stroke="#16A34A" strokeWidth={2} dot={false} />
             </LineChart>
           </ResponsiveContainer>
         </div>
       </div>
 
-      {/* 4. Lactate vs Time */}
-      <div className="glass-panel p-4 rounded-2xl">
-        <div className="flex items-center justify-between mb-3">
-          <h3 className="text-xs font-bold text-amber-400 uppercase tracking-wider">
-            Metabolite (Lactate) vs Time
-          </h3>
-          <span className="text-[11px] font-mono text-slate-400">g/L</span>
+      {/* 4. Adaptive Perfusion Rate Chart */}
+      <div className="glass-panel p-5 rounded-xl border border-slate-200 space-y-3">
+        <div className="flex items-center justify-between border-b border-slate-100 pb-2">
+          <div>
+            <h3 className="text-xs font-bold text-slate-900 uppercase tracking-wider">
+              Adaptive Perfusion Rate
+            </h3>
+            <p className="text-[11px] text-slate-500">Feedback controller exchange action</p>
+          </div>
+          <span className="text-[10px] font-mono text-blue-700 bg-blue-50 border border-blue-200 px-1.5 py-0.5 rounded font-bold">
+            VVD
+          </span>
         </div>
-        <div className="h-52 w-full">
+        <div className="h-56 w-full">
           <ResponsiveContainer width="100%" height="100%">
-            <LineChart data={chartData} margin={{ top: 5, right: 10, left: -20, bottom: 0 }}>
-              <CartesianGrid strokeDasharray="3 3" stroke="#1E293B" />
-              <XAxis dataKey="time" stroke="#64748B" tick={{ fontSize: 10 }} />
-              <YAxis stroke="#64748B" tick={{ fontSize: 10 }} domain={[0, 'auto']} />
-              <Tooltip content={<CustomTooltip unit="g/L" />} />
-              <ReferenceLine y={3.5} stroke="#EF4444" strokeDasharray="4 4" label={{ value: 'Toxicity', fill: '#EF4444', fontSize: 10 }} />
-              <Line type="monotone" dataKey="metabolite" name="Lactate" stroke="#F59E0B" strokeWidth={2} dot={false} isAnimationActive={false} />
+            <LineChart data={formattedData} margin={{ top: 5, right: 10, left: -20, bottom: 0 }}>
+              <CartesianGrid strokeDasharray="3 3" stroke="#F1F5F9" vertical={false} />
+              <XAxis dataKey="time" stroke="#94A3B8" tick={{ fontSize: 10 }} />
+              <YAxis stroke="#94A3B8" tick={{ fontSize: 10 }} domain={[0, 4]} />
+              <Tooltip
+                contentStyle={{ backgroundColor: '#FFFFFF', borderColor: '#CBD5E1', borderRadius: '8px', fontSize: '11px' }}
+              />
+              <Line type="stepAfter" dataKey="perfusionRate" name="Perfusion Rate (VVD)" stroke="#2563EB" strokeWidth={2} dot={false} />
             </LineChart>
           </ResponsiveContainer>
         </div>
       </div>
 
-      {/* 5. Perfusion Rate vs Time */}
-      <div className="glass-panel p-4 rounded-2xl">
-        <div className="flex items-center justify-between mb-3">
-          <h3 className="text-xs font-bold text-blue-400 uppercase tracking-wider">
-            Perfusion Rate vs Time
-          </h3>
-          <span className="text-[11px] font-mono text-slate-400">VVD</span>
+      {/* 5. Membrane Fouling Load Index Chart */}
+      <div className="glass-panel p-5 rounded-xl border border-slate-200 space-y-3">
+        <div className="flex items-center justify-between border-b border-slate-100 pb-2">
+          <div>
+            <h3 className="text-xs font-bold text-slate-900 uppercase tracking-wider">
+              Filter Fouling Risk Trajectory
+            </h3>
+            <p className="text-[11px] text-slate-500">Normalized 0–100 membrane load proxy</p>
+          </div>
+          <span className="text-[10px] font-mono text-amber-700 bg-amber-50 border border-amber-200 px-1.5 py-0.5 rounded font-bold">
+            0–100
+          </span>
         </div>
-        <div className="h-52 w-full">
+        <div className="h-56 w-full">
           <ResponsiveContainer width="100%" height="100%">
-            <LineChart data={chartData} margin={{ top: 5, right: 10, left: -20, bottom: 0 }}>
-              <CartesianGrid strokeDasharray="3 3" stroke="#1E293B" />
-              <XAxis dataKey="time" stroke="#64748B" tick={{ fontSize: 10 }} />
-              <YAxis stroke="#64748B" tick={{ fontSize: 10 }} domain={[0, 4.5]} />
-              <Tooltip content={<CustomTooltip unit="VVD" />} />
-              <Line type="stepAfter" dataKey="perfusion" name="Perfusion Rate" stroke="#3B82F6" strokeWidth={2} dot={false} isAnimationActive={false} />
-            </LineChart>
-          </ResponsiveContainer>
-        </div>
-      </div>
-
-      {/* 6. Fouling Risk Index vs Time */}
-      <div className="glass-panel p-4 rounded-2xl">
-        <div className="flex items-center justify-between mb-3">
-          <h3 className="text-xs font-bold text-rose-400 uppercase tracking-wider">
-            Fouling Risk Index vs Time
-          </h3>
-          <span className="text-[11px] font-mono text-slate-400">0–100 Index</span>
-        </div>
-        <div className="h-52 w-full">
-          <ResponsiveContainer width="100%" height="100%">
-            <LineChart data={chartData} margin={{ top: 5, right: 10, left: -20, bottom: 0 }}>
-              <CartesianGrid strokeDasharray="3 3" stroke="#1E293B" />
-              <XAxis dataKey="time" stroke="#64748B" tick={{ fontSize: 10 }} />
-              <YAxis stroke="#64748B" tick={{ fontSize: 10 }} domain={[0, 100]} />
-              <Tooltip content={<CustomTooltip unit="/ 100" />} />
-              <ReferenceLine y={70} stroke="#EF4444" strokeDasharray="4 4" label={{ value: 'Warning (70)', fill: '#EF4444', fontSize: 10 }} />
-              <Line type="monotone" dataKey="fouling" name="Fouling Risk" stroke="#F43F5E" strokeWidth={2} dot={false} isAnimationActive={false} />
+            <LineChart data={formattedData} margin={{ top: 5, right: 10, left: -20, bottom: 0 }}>
+              <CartesianGrid strokeDasharray="3 3" stroke="#F1F5F9" vertical={false} />
+              <XAxis dataKey="time" stroke="#94A3B8" tick={{ fontSize: 10 }} />
+              <YAxis stroke="#94A3B8" tick={{ fontSize: 10 }} domain={[0, 100]} />
+              <Tooltip
+                contentStyle={{ backgroundColor: '#FFFFFF', borderColor: '#CBD5E1', borderRadius: '8px', fontSize: '11px' }}
+              />
+              <ReferenceLine y={70} stroke="#DC2626" strokeDasharray="3 3" label={{ value: 'Fouling Alert (70)', fill: '#DC2626', fontSize: 9 }} />
+              <Line type="monotone" dataKey="foulingIndex" name="Fouling Risk Index" stroke="#D97706" strokeWidth={2} dot={false} />
             </LineChart>
           </ResponsiveContainer>
         </div>

@@ -1,5 +1,6 @@
 import { useState, useEffect, useRef } from 'react';
-import Header from './components/dashboard/Header';
+import Sidebar from './components/layout/Sidebar';
+import HeaderBar from './components/layout/HeaderBar';
 import KpiCards from './components/dashboard/KpiCards';
 import ProcessCharts from './components/dashboard/ProcessCharts';
 import BioreactorDiagram from './components/dashboard/BioreactorDiagram';
@@ -7,6 +8,7 @@ import ControllerPanel from './components/dashboard/ControllerPanel';
 import EventLog from './components/dashboard/EventLog';
 import ScenarioComparisonView from './components/dashboard/ScenarioComparisonView';
 import FaultInjectionPanel from './components/dashboard/FaultInjectionPanel';
+import AnalyticsPage from './components/dashboard/AnalyticsPage';
 import ConfigModal from './components/dashboard/ConfigModal';
 
 import {
@@ -24,7 +26,7 @@ import {
 } from './services/api';
 
 export default function App() {
-  const [activeTab, setActiveTab] = useState<'dashboard' | 'diagram' | 'scenarios' | 'controller' | 'faults'>('dashboard');
+  const [activeTab, setActiveTab] = useState<'dashboard' | 'diagram' | 'scenarios' | 'controller' | 'faults' | 'analytics'>('dashboard');
   const [config, setConfig] = useState<BioreactorConfig | null>(null);
   const [state, setState] = useState<BioreactorState | null>(null);
   const [history, setHistory] = useState<SimulationHistoryItem[]>([]);
@@ -89,7 +91,6 @@ export default function App() {
         },
       ]);
 
-      // Stop if simulation reaches duration limit
       if (config && newState.simulation_time >= config.simulation_duration) {
         setIsRunning(false);
       }
@@ -167,23 +168,23 @@ export default function App() {
 
   if (!state || !config) {
     return (
-      <div className="min-h-screen bg-[#0B0F17] text-slate-100 flex items-center justify-center p-6 font-sans">
+      <div className="min-h-screen bg-[#F7F8FA] text-slate-800 flex items-center justify-center p-6 font-sans">
         <div className="text-center space-y-4 max-w-md">
           {initError ? (
-            <div className="p-6 bg-slate-900 border border-slate-800 rounded-2xl space-y-3">
-              <div className="text-rose-400 font-bold text-sm">Connection Error</div>
-              <p className="text-xs text-slate-400 font-mono">{initError}</p>
+            <div className="p-6 bg-white border border-slate-200 rounded-2xl shadow-sm space-y-3">
+              <div className="text-red-600 font-bold text-sm">Connection Error</div>
+              <p className="text-xs text-slate-500 font-mono">{initError}</p>
               <button
                 onClick={() => initEngine()}
-                className="px-4 py-2 rounded-xl text-xs font-bold bg-cyan-500 hover:bg-cyan-400 text-black transition"
+                className="px-4 py-2 rounded-xl text-xs font-bold bg-blue-600 hover:bg-blue-700 text-white transition"
               >
                 Retry Connection
               </button>
             </div>
           ) : (
             <>
-              <div className="w-10 h-10 border-2 border-cyan-400 border-t-transparent rounded-full animate-spin mx-auto"></div>
-              <p className="text-xs text-slate-400 font-mono">Initializing Digital Twin Simulation Engine...</p>
+              <div className="w-10 h-10 border-2 border-blue-600 border-t-transparent rounded-full animate-spin mx-auto"></div>
+              <p className="text-xs text-slate-600 font-mono">Initializing Digital Twin Simulation Engine...</p>
             </>
           )}
         </div>
@@ -192,58 +193,68 @@ export default function App() {
   }
 
   return (
-    <div className="min-h-screen bg-[#0B0F17] text-slate-100 p-6 flex flex-col font-sans selection:bg-cyan-500/30 selection:text-cyan-200">
-      <Header
+    <div className="flex min-h-screen bg-[#F7F8FA] text-slate-900 font-sans selection:bg-blue-100 selection:text-blue-900">
+      {/* Persistent Left Navigation Sidebar */}
+      <Sidebar
         activeTab={activeTab}
         setActiveTab={setActiveTab}
-        isRunning={isRunning}
-        onTogglePlay={handleTogglePlay}
-        onStep={handleStep}
-        onReset={handleReset}
-        onRunFull={handleRunFull}
-        onRunDemo={handleRunDemo}
         onOpenConfig={() => setIsConfigOpen(true)}
-        simulationSpeed={simulationSpeed}
-        setSimulationSpeed={setSimulationSpeed}
-        simulationTime={state.simulation_time}
       />
 
-      <main className="flex-1 space-y-6 max-w-7xl mx-auto w-full">
-        {/* Main Tab Content */}
-        {activeTab === 'dashboard' && (
-          <div className="space-y-6">
-            {/* Primary KPI Cards */}
-            <KpiCards state={state} />
+      {/* Main Workspace Layout */}
+      <div className="flex-1 flex flex-col min-w-0 overflow-x-hidden">
+        <HeaderBar
+          isRunning={isRunning}
+          onTogglePlay={handleTogglePlay}
+          onStep={handleStep}
+          onReset={handleReset}
+          onRunFull={handleRunFull}
+          onRunDemo={handleRunDemo}
+          onOpenConfig={() => setIsConfigOpen(true)}
+          simulationSpeed={simulationSpeed}
+          setSimulationSpeed={setSimulationSpeed}
+          simulationTime={state.simulation_time}
+        />
 
-            {/* Time-Series Charts */}
-            <ProcessCharts history={history} targetCellDensity={state.target_cell_density} />
-
-            {/* Controller Panel & Real-time Event Log */}
-            <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-              <div className="lg:col-span-2">
-                <ControllerPanel state={state} onRefreshState={handleRefreshState} />
-              </div>
-              <div>
-                <EventLog history={history} latestAction={state.latest_controller_action} activeFault={state.active_fault} />
+        <main className="flex-1 p-6 space-y-6 max-w-7xl w-full mx-auto">
+          {/* 1. Overview Dashboard */}
+          {activeTab === 'dashboard' && (
+            <div className="space-y-6">
+              <KpiCards state={state} />
+              <ProcessCharts history={history} targetCellDensity={state.target_cell_density} />
+              <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                <div className="lg:col-span-2">
+                  <ControllerPanel state={state} onRefreshState={handleRefreshState} />
+                </div>
+                <div>
+                  <EventLog history={history} latestAction={state.latest_controller_action} activeFault={state.active_fault} />
+                </div>
               </div>
             </div>
-          </div>
-        )}
+          )}
 
-        {activeTab === 'diagram' && <BioreactorDiagram state={state} />}
+          {/* 2. Process Flow View */}
+          {activeTab === 'diagram' && <BioreactorDiagram state={state} />}
 
-        {activeTab === 'scenarios' && <ScenarioComparisonView />}
+          {/* 3. Scenario Comparison View */}
+          {activeTab === 'scenarios' && <ScenarioComparisonView />}
 
-        {activeTab === 'controller' && (
-          <ControllerPanel state={state} onRefreshState={handleRefreshState} />
-        )}
+          {/* 4. Automated Controller Panel */}
+          {activeTab === 'controller' && (
+            <ControllerPanel state={state} onRefreshState={handleRefreshState} />
+          )}
 
-        {activeTab === 'faults' && (
-          <FaultInjectionPanel onRefreshState={handleRefreshState} />
-        )}
-      </main>
+          {/* 5. Process Disturbance & Fault Analysis */}
+          {activeTab === 'faults' && (
+            <FaultInjectionPanel onRefreshState={handleRefreshState} />
+          )}
 
-      {/* Configuration Drawer Modal */}
+          {/* 6. Advanced Process Analytics & Monte Carlo */}
+          {activeTab === 'analytics' && <AnalyticsPage state={state} />}
+        </main>
+      </div>
+
+      {/* Configuration Parameters Modal */}
       <ConfigModal
         config={config}
         isOpen={isConfigOpen}

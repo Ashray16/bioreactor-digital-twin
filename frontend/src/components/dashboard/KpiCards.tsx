@@ -6,7 +6,6 @@ interface KpiCardsProps {
 }
 
 export default function KpiCards({ state }: KpiCardsProps) {
-  // Clean standard scientific notation formatting
   const isHighDensity = state.viable_cell_density >= 1e7;
   const cellDensityFormatted = isHighDensity
     ? (state.viable_cell_density / 1e7).toFixed(2)
@@ -18,174 +17,174 @@ export default function KpiCards({ state }: KpiCardsProps) {
   const getFoulingBadgeClass = (status: string) => {
     switch (status) {
       case 'LOW':
-        return 'bg-emerald-950/80 text-emerald-400 border-emerald-500/40';
+        return 'bg-emerald-50 text-emerald-700 border-emerald-200';
       case 'MODERATE':
-        return 'bg-amber-950/80 text-amber-400 border-amber-500/40';
+        return 'bg-amber-50 text-amber-700 border-amber-200';
       case 'HIGH':
-        return 'bg-orange-950/80 text-orange-400 border-orange-500/40';
+        return 'bg-orange-50 text-orange-700 border-orange-200';
       case 'CRITICAL':
-        return 'bg-rose-950/80 text-rose-400 border-rose-500/40 animate-pulse';
+        return 'bg-red-50 text-red-700 border-red-200 animate-pulse';
       default:
-        return 'bg-slate-900 text-slate-400 border-slate-700';
+        return 'bg-slate-100 text-slate-600 border-slate-200';
     }
   };
 
   return (
-    <div className="space-y-3">
+    <div className="space-y-4">
       {/* Digital Twin Status Bar */}
-      <div className="glass-panel px-4 py-2 rounded-xl border border-slate-800/80 flex items-center justify-between text-xs text-slate-400 bg-slate-950/50">
+      <div className="glass-panel px-4 py-2.5 rounded-xl border border-slate-200 flex items-center justify-between text-xs text-slate-600 bg-white">
         <div className="flex items-center gap-3">
-          <span className="flex items-center gap-1.5 font-bold text-emerald-400">
-            <span className="w-2 h-2 rounded-full bg-emerald-400 animate-ping"></span>
-            DIGITAL TWIN: SYNCHRONIZED
+          <span className="flex items-center gap-1.5 font-bold text-emerald-600">
+            <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
+            Digital Twin Synchronized
           </span>
-          <span className="text-slate-600">|</span>
-          <span>Model Status: <strong className="text-slate-200">Valid Monod-Contois ODEs</strong></span>
+          <span className="text-slate-300">|</span>
+          <span>Model Status: <strong className="text-slate-800 font-semibold">Valid Monod-Contois ODEs</strong></span>
         </div>
         <div className="flex items-center gap-3 font-mono text-[11px]">
-          <span>Controller: <strong className={state.controller_enabled ? "text-emerald-400" : "text-amber-400"}>{state.controller_enabled ? "ACTIVE (Feedback Loop)" : "INACTIVE (Fixed Perfusion)"}</strong></span>
-          <span className="text-slate-600">|</span>
-          <span>Perfusion: <strong className="text-cyan-400">{state.perfusion_rate.toFixed(2)} VVD</strong></span>
+          <span>Controller: <strong className={state.controller_enabled ? "text-blue-700 font-bold" : "text-amber-700 font-bold"}>{state.controller_enabled ? "Active (Feedback Loop)" : "Inactive (Fixed Perfusion)"}</strong></span>
+          <span className="text-slate-300">|</span>
+          <span>Perfusion: <strong className="text-blue-600 font-bold">{state.perfusion_rate.toFixed(2)} VVD</strong></span>
         </div>
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-6 gap-4">
         {/* 1. Viable Cell Density */}
-        <div className="glass-panel p-4 rounded-2xl flex flex-col justify-between border-cyan-500/20 relative overflow-hidden">
+        <div className="glass-panel p-4 rounded-xl flex flex-col justify-between border-slate-200">
           <div className="flex items-center justify-between mb-2">
-            <span className="text-xs font-semibold text-cyan-400 flex items-center gap-1.5">
-              <Target className="w-3.5 h-3.5" />
+            <span className="text-xs font-bold text-slate-700 flex items-center gap-1.5">
+              <Target className="w-3.5 h-3.5 text-blue-600" />
               Viable Cell Density
             </span>
             {state.target_achieved ? (
-              <span className="flex items-center gap-1 px-1.5 py-0.5 rounded text-[10px] font-bold bg-emerald-950 text-emerald-400 border border-emerald-500/40">
-                <CheckCircle2 className="w-3 h-3" /> GOAL
+              <span className="flex items-center gap-1 px-1.5 py-0.5 rounded text-[10px] font-bold bg-emerald-50 text-emerald-700 border border-emerald-200">
+                <CheckCircle2 className="w-3 h-3" /> Target Met
               </span>
             ) : (
-              <span className="text-[10px] font-bold text-cyan-300 bg-cyan-950/60 px-1.5 py-0.5 rounded">{targetPercent}% Target</span>
+              <span className="text-[10px] font-bold text-blue-700 bg-blue-50 px-1.5 py-0.5 rounded border border-blue-100">{targetPercent}% Target</span>
             )}
           </div>
           <div>
-            <div className="text-2xl font-bold text-white tracking-tight">
-              {cellDensityFormatted} <span className="text-xs font-semibold text-cyan-400">×{cellDensityExponent}</span>
+            <div className="text-2xl font-bold text-slate-900 tracking-tight">
+              {cellDensityFormatted} <span className="text-xs font-semibold text-blue-600">×{cellDensityExponent}</span>
             </div>
-            <p className="text-[11px] font-mono text-slate-400 mt-0.5">cells/mL</p>
+            <p className="text-[11px] font-mono text-slate-500 mt-0.5">cells/mL</p>
           </div>
-          <div className="mt-3 pt-2 border-t border-slate-800/80 flex items-center justify-between text-[11px] text-slate-400">
+          <div className="mt-3 pt-2 border-t border-slate-100 flex items-center justify-between text-[11px] text-slate-500">
             <span>Target: 1.00 × 10⁸</span>
             {state.time_to_target && (
-              <span className="text-emerald-400 font-mono">t={state.time_to_target.toFixed(1)}h</span>
+              <span className="text-emerald-600 font-mono font-bold">t={state.time_to_target.toFixed(1)}h</span>
             )}
           </div>
         </div>
 
         {/* 2. Cell Viability */}
-        <div className="glass-panel p-4 rounded-2xl flex flex-col justify-between">
+        <div className="glass-panel p-4 rounded-xl flex flex-col justify-between border-slate-200">
           <div className="flex items-center justify-between mb-2">
-            <span className="text-xs font-semibold text-indigo-400 flex items-center gap-1.5">
-              <Heart className="w-3.5 h-3.5" />
+            <span className="text-xs font-bold text-slate-700 flex items-center gap-1.5">
+              <Heart className="w-3.5 h-3.5 text-emerald-600" />
               Cell Viability
             </span>
-            <span className={`text-[10px] font-bold px-1.5 py-0.5 rounded ${
-              state.cell_viability >= 90 ? 'text-emerald-400 bg-emerald-950/60' : 'text-amber-400 bg-amber-950/60'
+            <span className={`text-[10px] font-bold px-1.5 py-0.5 rounded border ${
+              state.cell_viability >= 90 ? 'text-emerald-700 bg-emerald-50 border-emerald-200' : 'text-amber-700 bg-amber-50 border-amber-200'
             }`}>
               {state.cell_viability >= 90 ? 'Healthy' : 'Stressed'}
             </span>
           </div>
           <div>
-            <div className="text-2xl font-bold text-white tracking-tight">
-              {state.cell_viability.toFixed(1)} <span className="text-sm font-normal text-slate-400">%</span>
+            <div className="text-2xl font-bold text-slate-900 tracking-tight">
+              {state.cell_viability.toFixed(1)} <span className="text-sm font-normal text-slate-500">%</span>
             </div>
-            <p className="text-[11px] text-slate-400 mt-0.5">Viable fraction</p>
+            <p className="text-[11px] text-slate-500 mt-0.5">Viable fraction</p>
           </div>
-          <div className="mt-3 pt-2 border-t border-slate-800/80 flex items-center justify-between text-[11px] text-slate-400">
+          <div className="mt-3 pt-2 border-t border-slate-100 flex items-center justify-between text-[11px] text-slate-500">
             <span>Dead cells:</span>
-            <span className="font-mono text-slate-300">{(state.nonviable_cell_density / 1e6).toFixed(2)}M</span>
+            <span className="font-mono text-slate-700">{(state.nonviable_cell_density / 1e6).toFixed(2)}M</span>
           </div>
         </div>
 
-        {/* 3. Nutrient (Glucose) */}
-        <div className="glass-panel p-4 rounded-2xl flex flex-col justify-between" title="Mass Balance: dS/dt = D*(S_feed - S) - q_s*X_v">
+        {/* 3. Glucose (Nutrient) */}
+        <div className="glass-panel p-4 rounded-xl flex flex-col justify-between border-slate-200" title="Mass Balance: dS/dt = D*(S_feed - S) - q_s*X_v">
           <div className="flex items-center justify-between mb-2">
-            <span className="text-xs font-semibold text-emerald-400 flex items-center gap-1.5">
-              <Droplet className="w-3.5 h-3.5" />
+            <span className="text-xs font-bold text-slate-700 flex items-center gap-1.5">
+              <Droplet className="w-3.5 h-3.5 text-blue-600" />
               Glucose (Nutrient)
             </span>
-            <span className={`text-[10px] font-bold px-1.5 py-0.5 rounded ${
-              state.nutrient_concentration >= 1.5 ? 'text-emerald-400 bg-emerald-950/60' : 'text-rose-400 bg-rose-950/60'
+            <span className={`text-[10px] font-bold px-1.5 py-0.5 rounded border ${
+              state.nutrient_concentration >= 1.5 ? 'text-emerald-700 bg-emerald-50 border-emerald-200' : 'text-red-700 bg-red-50 border-red-200'
             }`}>
-              {state.nutrient_concentration >= 1.5 ? 'Sufficient' : 'Low'}
+              {state.nutrient_concentration >= 1.5 ? 'Normal Range' : 'Low Level'}
             </span>
           </div>
           <div>
-            <div className="text-2xl font-bold text-white tracking-tight">
-              {state.nutrient_concentration.toFixed(2)} <span className="text-sm font-normal text-slate-400">g/L</span>
+            <div className="text-2xl font-bold text-slate-900 tracking-tight">
+              {state.nutrient_concentration.toFixed(2)} <span className="text-sm font-normal text-slate-500">g/L</span>
             </div>
-            <p className="text-[11px] text-slate-400 mt-0.5">Mass Balance In - Out</p>
+            <p className="text-[11px] text-slate-500 mt-0.5">dS/dt Mass Balance</p>
           </div>
-          <div className="mt-3 pt-2 border-t border-slate-800/80 flex items-center justify-between text-[11px] text-slate-400">
+          <div className="mt-3 pt-2 border-t border-slate-100 flex items-center justify-between text-[11px] text-slate-500">
             <span>Min Limit:</span>
-            <span className="font-mono text-slate-300">1.50 g/L</span>
+            <span className="font-mono text-slate-700">1.50 g/L</span>
           </div>
         </div>
 
-        {/* 4. Metabolite (Lactate) */}
-        <div className="glass-panel p-4 rounded-2xl flex flex-col justify-between">
+        {/* 4. Lactate (Metabolite) */}
+        <div className="glass-panel p-4 rounded-xl flex flex-col justify-between border-slate-200">
           <div className="flex items-center justify-between mb-2">
-            <span className="text-xs font-semibold text-amber-400 flex items-center gap-1.5">
-              <Flame className="w-3.5 h-3.5" />
+            <span className="text-xs font-bold text-slate-700 flex items-center gap-1.5">
+              <Flame className="w-3.5 h-3.5 text-amber-600" />
               Lactate (Metabolite)
             </span>
-            <span className={`text-[10px] font-bold px-1.5 py-0.5 rounded ${
-              state.metabolite_concentration <= 3.5 ? 'text-emerald-400 bg-emerald-950/60' : 'text-amber-400 bg-amber-950/60'
+            <span className={`text-[10px] font-bold px-1.5 py-0.5 rounded border ${
+              state.metabolite_concentration <= 3.5 ? 'text-emerald-700 bg-emerald-50 border-emerald-200' : 'text-amber-700 bg-amber-50 border-amber-200'
             }`}>
-              {state.metabolite_concentration <= 3.5 ? 'Normal' : 'High'}
+              {state.metabolite_concentration <= 3.5 ? 'Below Limit' : 'Elevated'}
             </span>
           </div>
           <div>
-            <div className="text-2xl font-bold text-white tracking-tight">
-              {state.metabolite_concentration.toFixed(2)} <span className="text-sm font-normal text-slate-400">g/L</span>
+            <div className="text-2xl font-bold text-slate-900 tracking-tight">
+              {state.metabolite_concentration.toFixed(2)} <span className="text-sm font-normal text-slate-500">g/L</span>
             </div>
-            <p className="text-[11px] text-slate-400 mt-0.5">Inhibitory byproduct</p>
+            <p className="text-[11px] text-slate-500 mt-0.5">Byproduct Concentration</p>
           </div>
-          <div className="mt-3 pt-2 border-t border-slate-800/80 flex items-center justify-between text-[11px] text-slate-400">
+          <div className="mt-3 pt-2 border-t border-slate-100 flex items-center justify-between text-[11px] text-slate-500">
             <span>Toxicity Limit:</span>
-            <span className="font-mono text-slate-300">3.50 g/L</span>
+            <span className="font-mono text-slate-700">3.50 g/L</span>
           </div>
         </div>
 
         {/* 5. Perfusion Rate */}
-        <div className="glass-panel p-4 rounded-2xl flex flex-col justify-between">
+        <div className="glass-panel p-4 rounded-xl flex flex-col justify-between border-slate-200">
           <div className="flex items-center justify-between mb-2">
-            <span className="text-xs font-semibold text-blue-400 flex items-center gap-1.5">
-              <RefreshCw className="w-3.5 h-3.5" />
+            <span className="text-xs font-bold text-slate-700 flex items-center gap-1.5">
+              <RefreshCw className="w-3.5 h-3.5 text-blue-600" />
               Perfusion Rate
             </span>
-            <span className={`text-[10px] font-bold px-1.5 py-0.5 rounded ${
-              state.controller_enabled ? 'text-cyan-400 bg-cyan-950/60' : 'text-slate-400 bg-slate-800'
+            <span className={`text-[10px] font-bold px-1.5 py-0.5 rounded border ${
+              state.controller_enabled ? 'text-blue-700 bg-blue-50 border-blue-200' : 'text-slate-600 bg-slate-100 border-slate-200'
             }`}>
-              {state.controller_enabled ? 'AUTO' : 'MANUAL'}
+              {state.controller_enabled ? 'Adaptive' : 'Manual'}
             </span>
           </div>
           <div>
-            <div className="text-2xl font-bold text-white tracking-tight">
-              {state.perfusion_rate.toFixed(2)} <span className="text-sm font-normal text-slate-400">VVD</span>
+            <div className="text-2xl font-bold text-slate-900 tracking-tight">
+              {state.perfusion_rate.toFixed(2)} <span className="text-sm font-normal text-slate-500">VVD</span>
             </div>
-            <p className="text-[11px] text-slate-400 mt-0.5">Media exchange rate</p>
+            <p className="text-[11px] text-slate-500 mt-0.5">Volumetric Exchange</p>
           </div>
-          <div className="mt-3 pt-2 border-t border-slate-800/80 flex items-center justify-between text-[11px] text-slate-400">
+          <div className="mt-3 pt-2 border-t border-slate-100 flex items-center justify-between text-[11px] text-slate-500">
             <span>Flow Rate:</span>
-            <span className="font-mono text-slate-300">
+            <span className="font-mono text-slate-700">
               {((state.perfusion_rate / 24.0) * state.reactor_volume).toFixed(3)} L/h
             </span>
           </div>
         </div>
 
         {/* 6. Filter Fouling Risk Index */}
-        <div className="glass-panel p-4 rounded-2xl flex flex-col justify-between border-slate-800">
+        <div className="glass-panel p-4 rounded-xl flex flex-col justify-between border-slate-200">
           <div className="flex items-center justify-between mb-2">
-            <span className="text-xs font-semibold text-rose-400 flex items-center gap-1.5">
-              <AlertTriangle className="w-3.5 h-3.5" />
+            <span className="text-xs font-bold text-slate-700 flex items-center gap-1.5">
+              <AlertTriangle className="w-3.5 h-3.5 text-amber-600" />
               Fouling Risk Index
             </span>
             <span className={`text-[10px] font-mono font-bold px-2 py-0.5 rounded border ${getFoulingBadgeClass(state.fouling_state)}`}>
@@ -193,14 +192,14 @@ export default function KpiCards({ state }: KpiCardsProps) {
             </span>
           </div>
           <div>
-            <div className="text-2xl font-bold text-white tracking-tight">
-              {state.fouling_index.toFixed(1)} <span className="text-sm font-normal text-slate-400">/ 100</span>
+            <div className="text-2xl font-bold text-slate-900 tracking-tight">
+              {state.fouling_index.toFixed(1)} <span className="text-sm font-normal text-slate-500">/ 100</span>
             </div>
-            <p className="text-[11px] text-slate-400 mt-0.5">Membrane load proxy</p>
+            <p className="text-[11px] text-slate-500 mt-0.5">Membrane Loading Proxy</p>
           </div>
-          <div className="mt-3 pt-2 border-t border-slate-800/80 flex items-center justify-between text-[11px] text-slate-400">
-            <span>Warning Threshold:</span>
-            <span className="font-mono text-slate-300">70 / 100</span>
+          <div className="mt-3 pt-2 border-t border-slate-100 flex items-center justify-between text-[11px] text-slate-500">
+            <span>Warning Limit:</span>
+            <span className="font-mono text-slate-700">70 / 100</span>
           </div>
         </div>
       </div>

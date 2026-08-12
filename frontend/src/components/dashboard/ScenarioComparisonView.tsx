@@ -16,7 +16,7 @@ export default function ScenarioComparisonView() {
       const res = await runScenarioComparison({
         simulation_duration: 120.0,
         timestep: 0.5,
-        initial_nutrient: 2.0, // Low initial nutrient to demonstrate controller power
+        initial_nutrient: 2.0,
       });
       setData(res);
     } catch (err: any) {
@@ -30,14 +30,13 @@ export default function ScenarioComparisonView() {
     handleRunComparison();
   }, []);
 
-  // Merge history for Recharts side-by-side comparison
   const mergedHistory = data
     ? data.uncontrolled_scenario.history.map((h, i) => {
         const ctrl = data.controlled_scenario.history[i] || h;
         return {
           time: h.time,
-          uncontrolledDensity: Number((h.viable_cell_density / 1e8).toFixed(3)),
-          controlledDensity: Number((ctrl.viable_cell_density / 1e8).toFixed(3)),
+          uncontrolledDensity: Number((h.viable_cell_density / 1e6).toFixed(1)),
+          controlledDensity: Number((ctrl.viable_cell_density / 1e6).toFixed(1)),
           uncontrolledGlucose: h.nutrient_concentration,
           controlledGlucose: ctrl.nutrient_concentration,
           uncontrolledLactate: h.metabolite_concentration,
@@ -51,29 +50,29 @@ export default function ScenarioComparisonView() {
   return (
     <div className="space-y-6">
       {/* Header Banner */}
-      <div className="glass-panel p-6 rounded-2xl border border-slate-800 flex flex-col md:flex-row md:items-center justify-between gap-4">
+      <div className="glass-panel p-6 rounded-xl border border-slate-200 flex flex-col md:flex-row md:items-center justify-between gap-4 bg-white">
         <div>
-          <h2 className="text-lg font-bold text-white flex items-center gap-2">
-            <Layers className="w-5 h-5 text-cyan-400" />
-            Controlled vs Uncontrolled Bioprocess Scenario Comparison
+          <h2 className="text-base font-bold text-slate-900 flex items-center gap-2">
+            <Layers className="w-5 h-5 text-blue-600" />
+            Controlled vs Uncontrolled Scenario Comparison
           </h2>
-          <p className="text-xs text-slate-400 mt-1">
-            Evaluate twin trajectories: <strong>Scenario A (Uncontrolled Fixed Perfusion)</strong> vs <strong>Scenario B (Adaptive Perfusion Control)</strong>
+          <p className="text-xs text-slate-500 mt-1">
+            Comparative digital twin trajectory analysis: <strong>Scenario A (Uncontrolled Fixed Perfusion 0.8 VVD)</strong> vs <strong>Scenario B (Adaptive Perfusion Control)</strong>
           </p>
         </div>
 
         <button
           onClick={handleRunComparison}
           disabled={loading}
-          className="flex items-center gap-2 px-4 py-2.5 rounded-xl text-xs font-bold bg-cyan-500 hover:bg-cyan-400 text-black transition shadow-lg shadow-cyan-500/20 disabled:opacity-50"
+          className="flex items-center gap-2 px-4 py-2.5 rounded-xl text-xs font-bold bg-blue-600 hover:bg-blue-700 text-white transition shadow-sm disabled:opacity-50"
         >
           <Play className="w-4 h-4 fill-current" />
-          <span>{loading ? 'RUNNING SCENARIOS...' : 'EXECUTE COMPARISON'}</span>
+          <span>{loading ? 'Executing Scenarios...' : 'Execute Comparison'}</span>
         </button>
       </div>
 
       {error && (
-        <div className="p-4 rounded-xl bg-rose-950/60 border border-rose-500/40 text-rose-300 text-xs flex items-center gap-2">
+        <div className="p-4 rounded-xl bg-red-50 border border-red-200 text-red-700 text-xs flex items-center gap-2">
           <AlertCircle className="w-4 h-4" />
           <span>{error}</span>
         </div>
@@ -82,12 +81,12 @@ export default function ScenarioComparisonView() {
       {data && (
         <>
           {/* Overall Outcome Banner */}
-          <div className="glass-panel p-5 rounded-2xl border border-slate-800 flex flex-col md:flex-row md:items-center justify-between gap-4 bg-slate-900/60">
+          <div className="glass-panel p-5 rounded-xl border border-slate-200 flex flex-col md:flex-row md:items-center justify-between gap-4 bg-slate-50">
             <div>
-              <div className="text-[11px] font-bold uppercase tracking-wider text-slate-400 mb-1">
+              <div className="text-[11px] font-bold uppercase tracking-wider text-slate-500 mb-1">
                 Overall Controlled Strategy Evaluation
               </div>
-              <p className="text-xs text-slate-300 font-medium">
+              <p className="text-xs text-slate-700 font-medium">
                 {data.outcome_summary}
               </p>
             </div>
@@ -95,64 +94,71 @@ export default function ScenarioComparisonView() {
               <span
                 className={`px-3 py-1.5 rounded-xl text-xs font-bold uppercase tracking-wider border ${
                   data.overall_outcome === 'IMPROVED'
-                    ? 'bg-emerald-950/80 text-emerald-300 border-emerald-500/40'
+                    ? 'bg-emerald-50 text-emerald-800 border-emerald-300'
                     : data.overall_outcome === 'DEGRADED'
-                    ? 'bg-rose-950/80 text-rose-300 border-rose-500/40'
-                    : 'bg-slate-800 text-slate-300 border-slate-700'
+                    ? 'bg-red-50 text-red-800 border-red-300'
+                    : 'bg-slate-100 text-slate-800 border-slate-300'
                 }`}
               >
                 {data.overall_outcome === 'IMPROVED'
-                  ? '✓ STRATEGY IMPROVED OUTCOME'
+                  ? '✓ Strategy Improved Outcome'
                   : data.overall_outcome === 'DEGRADED'
-                  ? '⚠️ STRATEGY DEGRADED OUTCOME'
-                  : '— NO SIGNIFICANT CHANGE'}
+                  ? '⚠️ Strategy Degraded Outcome'
+                  : '— No Significant Change'}
               </span>
             </div>
           </div>
 
           {/* Comparison Table */}
-          <div className="glass-panel p-6 rounded-2xl border border-slate-800">
-            <h3 className="text-sm font-bold text-slate-200 uppercase tracking-wider mb-4">
-              Performance Metrics Comparison Summary
+          <div className="glass-panel p-6 rounded-xl border border-slate-200 bg-white space-y-4">
+            <h3 className="text-xs font-bold text-slate-900 uppercase tracking-wider">
+              Performance Metrics Analytical Trade-off Table
             </h3>
 
-            <div className="overflow-x-auto">
+            <div className="overflow-x-auto border border-slate-200 rounded-lg">
               <table className="w-full text-left text-xs font-sans">
                 <thead>
-                  <tr className="border-b border-slate-800 text-slate-400 text-[11px]">
+                  <tr className="bg-slate-50 border-b border-slate-200 text-slate-600 text-[11px] font-bold">
                     <th className="py-2.5 px-3">Metric</th>
-                    <th className="py-2.5 px-3 text-amber-400">Scenario A (Uncontrolled)</th>
-                    <th className="py-2.5 px-3 text-cyan-400">Scenario B (Controlled)</th>
-                    <th className="py-2.5 px-3">Difference</th>
-                    <th className="py-2.5 px-3">Outcome</th>
+                    <th className="py-2.5 px-3 text-amber-700">Scenario A (Uncontrolled)</th>
+                    <th className="py-2.5 px-3 text-blue-700">Scenario B (Controlled)</th>
+                    <th className="py-2.5 px-3">Difference (Δ)</th>
+                    <th className="py-2.5 px-3">Status</th>
                   </tr>
                 </thead>
-                <tbody className="divide-y divide-slate-800/60">
-                  {data.comparison_table.map((row, idx) => (
-                    <tr key={idx} className="hover:bg-slate-900/40 transition">
-                      <td className="py-3 px-3 font-semibold text-slate-200">{row.metric_name}</td>
-                      <td className="py-3 px-3 font-mono text-slate-300">
-                        {row.uncontrolled_val} {row.unit}
-                      </td>
-                      <td className="py-3 px-3 font-mono font-bold text-cyan-300">
-                        {row.controlled_val} {row.unit}
-                      </td>
-                      <td className="py-3 px-3 font-mono text-slate-400">
-                        {row.difference > 0 ? `+${row.difference}` : row.difference} {row.unit}
-                      </td>
-                      <td className="py-3 px-3">
-                        {row.improved ? (
-                          <span className="inline-flex items-center gap-1 text-[11px] font-bold text-emerald-400">
-                            <CheckCircle2 className="w-3.5 h-3.5" /> IMPROVED
-                          </span>
-                        ) : (
-                          <span className="inline-flex items-center gap-1 text-[11px] font-bold text-slate-400">
-                            NEUTRAL
-                          </span>
-                        )}
-                      </td>
-                    </tr>
-                  ))}
+                <tbody className="divide-y divide-slate-100 font-mono">
+                  {data.comparison_table.map((row, idx) => {
+                    const isMediaMetric = row.metric_name === 'Total Media Consumed';
+                    return (
+                      <tr key={idx} className="hover:bg-slate-50 transition">
+                        <td className="py-3 px-3 font-sans font-semibold text-slate-800">{row.metric_name}</td>
+                        <td className="py-3 px-3 text-slate-700">
+                          {row.uncontrolled_val} {row.unit}
+                        </td>
+                        <td className="py-3 px-3 font-bold text-blue-700">
+                          {row.controlled_val} {row.unit}
+                        </td>
+                        <td className="py-3 px-3 text-slate-600">
+                          {row.difference > 0 ? `+${row.difference}` : row.difference} {row.unit}
+                        </td>
+                        <td className="py-3 px-3 font-sans">
+                          {isMediaMetric ? (
+                            <span className="inline-flex items-center gap-1 text-[11px] font-bold text-amber-700 bg-amber-50 px-2 py-0.5 rounded border border-amber-200">
+                              TRADE-OFF (+ Media)
+                            </span>
+                          ) : row.improved ? (
+                            <span className="inline-flex items-center gap-1 text-[11px] font-bold text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded border border-emerald-200">
+                              <CheckCircle2 className="w-3.5 h-3.5" /> IMPROVED
+                            </span>
+                          ) : (
+                            <span className="inline-flex items-center gap-1 text-[11px] font-bold text-slate-500 bg-slate-100 px-2 py-0.5 rounded border border-slate-200">
+                              NEUTRAL
+                            </span>
+                          )}
+                        </td>
+                      </tr>
+                    );
+                  })}
                 </tbody>
               </table>
             </div>
@@ -161,40 +167,40 @@ export default function ScenarioComparisonView() {
           {/* Side-by-Side Trajectory Graphs */}
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             {/* Cell Density Trajectory Comparison */}
-            <div className="glass-panel p-5 rounded-2xl">
-              <h3 className="text-xs font-bold text-cyan-400 uppercase tracking-wider mb-3">
+            <div className="glass-panel p-5 rounded-xl border border-slate-200 bg-white space-y-3">
+              <h3 className="text-xs font-bold text-blue-700 uppercase tracking-wider">
                 Viable Cell Density Trajectory (Uncontrolled vs Controlled)
               </h3>
               <div className="h-64 w-full">
                 <ResponsiveContainer width="100%" height="100%">
                   <LineChart data={mergedHistory} margin={{ top: 5, right: 10, left: -20, bottom: 0 }}>
-                    <CartesianGrid strokeDasharray="3 3" stroke="#1E293B" />
-                    <XAxis dataKey="time" stroke="#64748B" tick={{ fontSize: 10 }} />
-                    <YAxis stroke="#64748B" tick={{ fontSize: 10 }} />
-                    <Tooltip />
+                    <CartesianGrid strokeDasharray="3 3" stroke="#F1F5F9" vertical={false} />
+                    <XAxis dataKey="time" stroke="#94A3B8" tick={{ fontSize: 10 }} />
+                    <YAxis stroke="#94A3B8" tick={{ fontSize: 10 }} />
+                    <Tooltip contentStyle={{ backgroundColor: '#FFFFFF', borderColor: '#CBD5E1', borderRadius: '8px', fontSize: '11px' }} />
                     <Legend wrapperStyle={{ fontSize: 11 }} />
-                    <Line type="monotone" dataKey="uncontrolledDensity" name="Uncontrolled Density" stroke="#F59E0B" strokeWidth={2} strokeDasharray="4 4" dot={false} />
-                    <Line type="monotone" dataKey="controlledDensity" name="Controlled Density" stroke="#00F0FF" strokeWidth={2.5} dot={false} />
+                    <Line type="monotone" dataKey="uncontrolledDensity" name="Uncontrolled Density (M/mL)" stroke="#D97706" strokeWidth={2} strokeDasharray="4 4" dot={false} />
+                    <Line type="monotone" dataKey="controlledDensity" name="Controlled Density (M/mL)" stroke="#2563EB" strokeWidth={2.5} dot={false} />
                   </LineChart>
                 </ResponsiveContainer>
               </div>
             </div>
 
             {/* Fouling Risk Trajectory Comparison */}
-            <div className="glass-panel p-5 rounded-2xl">
-              <h3 className="text-xs font-bold text-rose-400 uppercase tracking-wider mb-3">
+            <div className="glass-panel p-5 rounded-xl border border-slate-200 bg-white space-y-3">
+              <h3 className="text-xs font-bold text-red-700 uppercase tracking-wider">
                 Filter Fouling Risk Trajectory (Uncontrolled vs Controlled)
               </h3>
               <div className="h-64 w-full">
                 <ResponsiveContainer width="100%" height="100%">
                   <LineChart data={mergedHistory} margin={{ top: 5, right: 10, left: -20, bottom: 0 }}>
-                    <CartesianGrid strokeDasharray="3 3" stroke="#1E293B" />
-                    <XAxis dataKey="time" stroke="#64748B" tick={{ fontSize: 10 }} />
-                    <YAxis stroke="#64748B" tick={{ fontSize: 10 }} domain={[0, 100]} />
-                    <Tooltip />
+                    <CartesianGrid strokeDasharray="3 3" stroke="#F1F5F9" vertical={false} />
+                    <XAxis dataKey="time" stroke="#94A3B8" tick={{ fontSize: 10 }} />
+                    <YAxis stroke="#94A3B8" tick={{ fontSize: 10 }} domain={[0, 100]} />
+                    <Tooltip contentStyle={{ backgroundColor: '#FFFFFF', borderColor: '#CBD5E1', borderRadius: '8px', fontSize: '11px' }} />
                     <Legend wrapperStyle={{ fontSize: 11 }} />
-                    <Line type="monotone" dataKey="uncontrolledFouling" name="Uncontrolled Fouling" stroke="#EF4444" strokeWidth={2} strokeDasharray="4 4" dot={false} />
-                    <Line type="monotone" dataKey="controlledFouling" name="Controlled Fouling" stroke="#10B981" strokeWidth={2.5} dot={false} />
+                    <Line type="monotone" dataKey="uncontrolledFouling" name="Uncontrolled Fouling Risk" stroke="#DC2626" strokeWidth={2} strokeDasharray="4 4" dot={false} />
+                    <Line type="monotone" dataKey="controlledFouling" name="Controlled Fouling Risk" stroke="#059669" strokeWidth={2.5} dot={false} />
                   </LineChart>
                 </ResponsiveContainer>
               </div>
