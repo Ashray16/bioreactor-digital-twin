@@ -1,11 +1,14 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
+from app.api import simulation
 
 app = FastAPI(
     title="Digital Twin Bioreactor Platform API",
     description="API server for BB 04 Mammalian Cell Perfusion Bioreactor Digital Twin & Control Platform",
     version="1.0.0",
 )
+
+app.include_router(simulation.router)
 
 app.add_middleware(
     CORSMiddleware,
