@@ -126,6 +126,32 @@ def run_scenario_comparison(config: Optional[BioreactorConfig] = None):
     return scenario_engine.run_comparison(cfg)
 
 
+@router.post("/demo")
+def run_demo_scenario():
+    """Configure and execute the standard reproducible hackathon demo scenario."""
+    demo_config = BioreactorConfig(
+        reactor_volume=2.0,
+        initial_cell_density=0.5e6,
+        target_cell_density=1.0e8,
+        initial_nutrient=2.0,
+        feed_nutrient_concentration=10.0,
+        perfusion_rate=1.0,
+        min_perfusion_rate=0.5,
+        max_perfusion_rate=3.5,
+        simulation_duration=120.0,
+        timestep=0.5,
+        control_enabled=True,
+    )
+    scenario_engine = ScenarioEngine(demo_config)
+    comparison = scenario_engine.run_comparison(demo_config)
+    return {
+        "status": "demo_executed",
+        "story": "High-density perfusion digital twin simulation demonstrating adaptive rule-based control over 120 hours.",
+        "demo_config": demo_config,
+        "comparison_result": comparison,
+    }
+
+
 @router.post("/fault")
 def inject_process_fault(payload: FaultConfig):
     """Inject a simulated process disturbance into the active digital twin."""

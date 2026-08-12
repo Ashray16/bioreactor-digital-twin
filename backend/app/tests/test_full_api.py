@@ -55,6 +55,15 @@ def test_api_scenario_comparison():
     assert len(data["comparison_table"]) == 6
 
 
+def test_api_demo_scenario():
+    response = client.post("/api/v1/simulation/demo")
+    assert response.status_code == 200
+    data = response.json()
+    assert data["status"] == "demo_executed"
+    assert "comparison_result" in data
+    assert len(data["comparison_result"]["comparison_table"]) == 6
+
+
 def test_api_fault_injection():
     fault_payload = {
         "fault_type": "nutrient_reduction",
@@ -70,3 +79,5 @@ def test_api_fault_injection():
     step_resp = client.post("/api/v1/simulation/step", json={"dt": 1.0})
     assert step_resp.status_code == 200
     assert step_resp.json()["active_fault"] is not None
+
+
