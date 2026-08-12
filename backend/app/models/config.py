@@ -65,9 +65,9 @@ class BioreactorConfig(BaseModel):
         description="Nutrient concentration in fresh perfusion media feed (g/L)",
     )
     cell_nutrient_consumption_rate: float = Field(
-        default=3.5e-10,
+        default=5.0e-9,
         gt=0,
-        description="Specific glucose consumption rate q_s (g/cell/hour)",
+        description="Specific glucose consumption rate q_s (g/L/hr per cell/mL)",
     )
     monod_constant_nutrient: float = Field(
         default=0.5,
@@ -83,9 +83,9 @@ class BioreactorConfig(BaseModel):
         description="Initial lactate concentration (g/L)",
     )
     cell_metabolite_yield: float = Field(
-        default=3.0e-10,
+        default=4.0e-9,
         ge=0,
-        description="Specific lactate yield rate q_p (g/cell/hour)",
+        description="Specific lactate yield rate q_p (g/L/hr per cell/mL)",
     )
     metabolite_inhibition_constant: float = Field(
         default=4.0,
