@@ -1,21 +1,30 @@
 import { BioreactorState } from '../../types/simulation';
-import { ArrowRight, Activity, Cpu } from 'lucide-react';
+import { ArrowRight, Activity, Cpu, CheckCircle2 } from 'lucide-react';
 
 interface BioreactorDiagramProps {
   state: BioreactorState;
 }
 
 export default function BioreactorDiagram({ state }: BioreactorDiagramProps) {
-  const cellDensityM = (state.viable_cell_density / 1e6).toFixed(1);
+  const isHighDensity = state.viable_cell_density >= 1e7;
+  const cellDensityFormatted = isHighDensity
+    ? (state.viable_cell_density / 1e7).toFixed(2)
+    : (state.viable_cell_density / 1e6).toFixed(2);
+  const cellDensityExponent = isHighDensity ? '10⁷' : '10⁶';
+
   const flowRateLh = ((state.perfusion_rate / 24.0) * state.reactor_volume).toFixed(3);
+  const permeabilityPercent = Math.max(0, 100 - state.fouling_index).toFixed(1);
+
+  // Dynamic animation speed based on active perfusion rate VVD
+  const animDuration = `${Math.max(0.4, (2.5 / Math.max(0.5, state.perfusion_rate))).toFixed(2)}s`;
 
   return (
-    <div className="glass-panel p-6 rounded-2xl border border-slate-800">
-      <div className="flex items-center justify-between border-b border-slate-800 pb-4 mb-6">
+    <div className="glass-panel p-6 rounded-2xl border border-slate-800 space-y-6">
+      <div className="flex flex-col md:flex-row md:items-center justify-between border-b border-slate-800 pb-4 gap-4">
         <div>
           <h2 className="text-base font-bold text-white flex items-center gap-2">
             <Cpu className="w-5 h-5 text-cyan-400" />
-            Bioreactor Engineering &amp; Filtration Process Diagram
+            Bioreactor Engineering &amp; Dynamic Filtration Process Diagram
           </h2>
           <p className="text-xs text-slate-400">
             Real-time digital twin visualization of media exchange, cell retention, and membrane fouling load
@@ -52,9 +61,10 @@ export default function BioreactorDiagram({ state }: BioreactorDiagramProps) {
           </div>
         </div>
 
-        {/* Animated Connector Arrow */}
-        <div className="hidden md:flex items-center text-cyan-400/60 animate-pulse">
-          <ArrowRight className="w-8 h-8" />
+        {/* Animated Connector Arrow - Speed scaled to Perfusion Rate */}
+        <div className="hidden md:flex flex-col items-center gap-1 text-cyan-400/80">
+          <span className="text-[10px] font-mono text-cyan-400">{flowRateLh} L/h</span>
+          <ArrowRight className="w-8 h-8 animate-pulse" style={{ animationDuration: animDuration }} />
         </div>
 
         {/* 2. Bioreactor Main Vessel */}
@@ -74,7 +84,7 @@ export default function BioreactorDiagram({ state }: BioreactorDiagramProps) {
                 <div
                   key={i}
                   className="w-2.5 h-2.5 rounded-full bg-cyan-400 animate-ping"
-                  style={{ animationDuration: `${1.5 + (i % 3)}s` }}
+                  style={{ animationDuration: `${1.0 + (i % 3) * 0.5}s` }}
                 ></div>
               ))}
             </div>
@@ -82,7 +92,7 @@ export default function BioreactorDiagram({ state }: BioreactorDiagramProps) {
             <div className="relative z-10 space-y-1 bg-slate-950/80 p-2.5 rounded-lg border border-slate-800 text-xs">
               <div className="flex justify-between font-mono">
                 <span className="text-slate-400">Viable Density:</span>
-                <span className="text-cyan-300 font-bold">{cellDensityM}M /mL</span>
+                <span className="text-cyan-300 font-bold">{cellDensityFormatted} ×{cellDensityExponent}</span>
               </div>
               <div className="flex justify-between font-mono">
                 <span className="text-slate-400">Glucose:</span>
@@ -102,22 +112,25 @@ export default function BioreactorDiagram({ state }: BioreactorDiagramProps) {
         </div>
 
         {/* Animated Connector Arrow */}
-        <div className="hidden md:flex items-center text-cyan-400/60 animate-pulse">
-          <ArrowRight className="w-8 h-8" />
+        <div className="hidden md:flex flex-col items-center gap-1 text-cyan-400/80">
+          <span className="text-[10px] font-mono text-cyan-400">Cell Retention</span>
+          <ArrowRight className="w-8 h-8 animate-pulse" style={{ animationDuration: animDuration }} />
         </div>
 
         {/* 3. Cell Retention Filter Unit */}
-        <div className="relative flex flex-col items-center gap-2 p-5 bg-slate-900/90 border border-slate-800 rounded-2xl max-w-[200px] w-full text-center">
+        <div className="relative flex flex-col items-center gap-2 p-5 bg-slate-900/90 border border-slate-800 rounded-2xl max-w-[210px] w-full text-center">
           <div className="w-10 h-10 rounded-full bg-rose-950/80 border border-rose-500/40 text-rose-400 flex items-center justify-center font-bold">
             FILTER
           </div>
           <h4 className="text-xs font-bold text-white">Membrane Filter Unit</h4>
 
           {/* Membrane Fouling Meter */}
-          <div className="w-full bg-slate-950 p-2 rounded-lg border border-slate-800 my-1">
-            <div className="flex justify-between text-[10px] font-mono text-slate-400 mb-1">
-              <span>Fouling Load:</span>
-              <span className="text-rose-400 font-bold">{state.fouling_index.toFixed(1)}/100</span>
+          <div className="w-full bg-slate-950 p-2.5 rounded-lg border border-slate-800 my-1 space-y-2 text-left">
+            <div className="flex justify-between text-[10px] font-mono text-slate-400">
+              <span>Fouling Risk:</span>
+              <span className={`font-bold ${state.fouling_index >= 70 ? 'text-rose-400' : 'text-emerald-400'}`}>
+                {state.fouling_index.toFixed(1)}/100
+              </span>
             </div>
             <div className="w-full bg-slate-800 rounded-full h-2 overflow-hidden">
               <div
@@ -131,21 +144,23 @@ export default function BioreactorDiagram({ state }: BioreactorDiagramProps) {
                 style={{ width: `${Math.min(100, state.fouling_index)}%` }}
               ></div>
             </div>
+
+            <div className="flex justify-between text-[10px] font-mono text-slate-400 pt-1 border-t border-slate-800/80">
+              <span>Permeability:</span>
+              <span className="text-cyan-300 font-bold">{permeabilityPercent}%</span>
+            </div>
           </div>
 
-          <div className="text-[10px] text-slate-400">
-            Cells Retained in Vessel
-          </div>
-
-          <div className="flex items-center gap-1 text-[10px] text-rose-400 animate-pulse mt-1">
-            <span>Permeate Out</span>
-            <ArrowRight className="w-3 h-3" />
+          <div className="text-[10px] text-emerald-400 flex items-center gap-1">
+            <CheckCircle2 className="w-3 h-3" />
+            <span>100% Cell Retention</span>
           </div>
         </div>
 
         {/* Animated Connector Arrow */}
-        <div className="hidden md:flex items-center text-amber-400/60 animate-pulse">
-          <ArrowRight className="w-8 h-8" />
+        <div className="hidden md:flex flex-col items-center gap-1 text-amber-400/80">
+          <span className="text-[10px] font-mono text-amber-400">Permeate</span>
+          <ArrowRight className="w-8 h-8 animate-pulse" style={{ animationDuration: animDuration }} />
         </div>
 
         {/* 4. Waste Permeate Outflow */}

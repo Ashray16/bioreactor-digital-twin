@@ -81,6 +81,35 @@ export default function ScenarioComparisonView() {
 
       {data && (
         <>
+          {/* Overall Outcome Banner */}
+          <div className="glass-panel p-5 rounded-2xl border border-slate-800 flex flex-col md:flex-row md:items-center justify-between gap-4 bg-slate-900/60">
+            <div>
+              <div className="text-[11px] font-bold uppercase tracking-wider text-slate-400 mb-1">
+                Overall Controlled Strategy Evaluation
+              </div>
+              <p className="text-xs text-slate-300 font-medium">
+                {data.outcome_summary}
+              </p>
+            </div>
+            <div className="flex items-center gap-2">
+              <span
+                className={`px-3 py-1.5 rounded-xl text-xs font-bold uppercase tracking-wider border ${
+                  data.overall_outcome === 'IMPROVED'
+                    ? 'bg-emerald-950/80 text-emerald-300 border-emerald-500/40'
+                    : data.overall_outcome === 'DEGRADED'
+                    ? 'bg-rose-950/80 text-rose-300 border-rose-500/40'
+                    : 'bg-slate-800 text-slate-300 border-slate-700'
+                }`}
+              >
+                {data.overall_outcome === 'IMPROVED'
+                  ? '✓ STRATEGY IMPROVED OUTCOME'
+                  : data.overall_outcome === 'DEGRADED'
+                  ? '⚠️ STRATEGY DEGRADED OUTCOME'
+                  : '— NO SIGNIFICANT CHANGE'}
+              </span>
+            </div>
+          </div>
+
           {/* Comparison Table */}
           <div className="glass-panel p-6 rounded-2xl border border-slate-800">
             <h3 className="text-sm font-bold text-slate-200 uppercase tracking-wider mb-4">

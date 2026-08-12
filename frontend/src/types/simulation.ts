@@ -91,6 +91,8 @@ export interface ScenarioComparisonResponse {
   comparison_table: ScenarioComparisonItem[];
   total_media_consumed_uncontrolled_L: number;
   total_media_consumed_controlled_L: number;
+  overall_outcome: 'IMPROVED' | 'NO_SIGNIFICANT_CHANGE' | 'DEGRADED';
+  outcome_summary: string;
 }
 
 export interface FaultConfig {

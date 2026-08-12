@@ -10,7 +10,7 @@ export default function FaultInjectionPanel({ onRefreshState }: FaultInjectionPa
   const [selectedFault, setSelectedFault] = useState<
     'nutrient_reduction' | 'cell_death_surge' | 'fouling_surge' | 'perfusion_disruption'
   >('nutrient_reduction');
-  const [severity, setSeverity] = useState(0.7);
+  const [severity, setSeverity] = useState(0.75);
   const [startTime, setStartTime] = useState(10.0);
   const [duration, setDuration] = useState(24.0);
   const [injecting, setInjecting] = useState(false);
@@ -34,6 +34,45 @@ export default function FaultInjectionPanel({ onRefreshState }: FaultInjectionPa
       setInjecting(false);
     }
   };
+
+  const getFaultCausalChain = (fault: string) => {
+    switch (fault) {
+      case 'nutrient_reduction':
+        return [
+          { step: '1. Fault Injected', text: 'Nutrient feed reduced by 75%', color: 'text-rose-400 border-rose-500/30' },
+          { step: '2. Primary Impact', text: 'Substrate S drops below 1.5 g/L', color: 'text-amber-400 border-amber-500/30' },
+          { step: '3. Digital Twin Prediction', text: 'Cell growth rate halts (μ → 0)', color: 'text-cyan-400 border-cyan-500/30' },
+          { step: '4. Controller Action', text: 'Perfusion rate D adaptively boosted', color: 'text-indigo-400 border-indigo-500/30' },
+          { step: '5. Process Recovery', text: 'Substrate & cell density stabilized', color: 'text-emerald-400 border-emerald-500/30' },
+        ];
+      case 'cell_death_surge':
+        return [
+          { step: '1. Fault Injected', text: 'Elevated mortality rate (+0.03 h⁻¹)', color: 'text-rose-400 border-rose-500/30' },
+          { step: '2. Primary Impact', text: 'Cell viability drops below 85%', color: 'text-amber-400 border-amber-500/30' },
+          { step: '3. Digital Twin Prediction', text: 'Elevated debris accelerates filter loading', color: 'text-cyan-400 border-cyan-500/30' },
+          { step: '4. Controller Action', text: 'Perfusion adjusted for debris clearance', color: 'text-indigo-400 border-indigo-500/30' },
+          { step: '5. Process Recovery', text: 'Viability trend stabilizes', color: 'text-emerald-400 border-emerald-500/30' },
+        ];
+      case 'fouling_surge':
+        return [
+          { step: '1. Fault Injected', text: '3× Membrane Fouling Multiplier', color: 'text-rose-400 border-rose-500/30' },
+          { step: '2. Primary Impact', text: 'Fouling index F crosses 70 threshold', color: 'text-amber-400 border-amber-500/30' },
+          { step: '3. Digital Twin Prediction', text: 'Imminent filter occlusion warning', color: 'text-cyan-400 border-cyan-500/30' },
+          { step: '4. Controller Action', text: 'Perfusion rate throttled to safe flux', color: 'text-indigo-400 border-indigo-500/30' },
+          { step: '5. Process Recovery', text: 'Membrane risk contained in Moderate zone', color: 'text-emerald-400 border-emerald-500/30' },
+        ];
+      default:
+        return [
+          { step: '1. Fault Injected', text: 'Perfusion pump line disruption', color: 'text-rose-400 border-rose-500/30' },
+          { step: '2. Primary Impact', text: 'Perfusion flow drops by severity %', color: 'text-amber-400 border-amber-500/30' },
+          { step: '3. Digital Twin Prediction', text: 'Lactate accumulation hazard', color: 'text-cyan-400 border-cyan-500/30' },
+          { step: '4. Controller Action', text: 'Feedback controller signals pump alarm', color: 'text-indigo-400 border-indigo-500/30' },
+          { step: '5. Process Recovery', text: 'Emergency flow compensation', color: 'text-emerald-400 border-emerald-500/30' },
+        ];
+    }
+  };
+
+  const chain = getFaultCausalChain(selectedFault);
 
   return (
     <div className="glass-panel p-6 rounded-2xl border border-slate-800 space-y-6">
@@ -166,6 +205,22 @@ export default function FaultInjectionPanel({ onRefreshState }: FaultInjectionPa
               <span>INJECT FAULT DISTURBANCE</span>
             </button>
           </div>
+        </div>
+      </div>
+
+      {/* Causal Response Chain Section */}
+      <div className="p-5 bg-slate-900/70 border border-slate-800 rounded-2xl space-y-3">
+        <h3 className="text-xs font-bold text-slate-300 uppercase tracking-wider">
+          Expected Digital Twin &amp; Controller Causal Response Chain
+        </h3>
+
+        <div className="grid grid-cols-1 sm:grid-cols-5 gap-2">
+          {chain.map((c, i) => (
+            <div key={i} className={`p-3 bg-slate-950/80 border rounded-xl space-y-1 ${c.color}`}>
+              <div className="text-[10px] font-mono font-bold uppercase">{c.step}</div>
+              <div className="text-xs font-sans text-slate-200">{c.text}</div>
+            </div>
+          ))}
         </div>
       </div>
     </div>

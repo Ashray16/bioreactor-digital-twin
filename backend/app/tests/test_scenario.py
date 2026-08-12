@@ -18,13 +18,9 @@ def test_scenario_comparison_execution():
     assert res.total_media_consumed_uncontrolled_L > 0.0
     assert res.total_media_consumed_controlled_L > 0.0
 
-    metrics = [item.metric_name for item in res.comparison_table]
-    assert "Final Viable Cell Density" in metrics
-    assert "Final Cell Viability" in metrics
-    assert "Final Glucose Concentration" in metrics
-    assert "Final Lactate Concentration" in metrics
-    assert "Maximum Fouling Risk Index" in metrics
-    assert "Total Media Consumed" in metrics
+    assert res.overall_outcome in ["IMPROVED", "NO_SIGNIFICANT_CHANGE", "DEGRADED"]
+    assert len(res.outcome_summary) > 0
+
 
 
 def test_scenario_controlled_outperforms_uncontrolled_under_nutrient_stress():

@@ -63,7 +63,7 @@ export default function Header({
               }`}
             >
               {isRunning ? <Pause className="w-3.5 h-3.5" /> : <Play className="w-3.5 h-3.5" />}
-              <span>{isRunning ? 'PAUSE' : 'START'}</span>
+              <span>{isRunning ? 'PAUSE' : 'START SIMULATION'}</span>
             </button>
 
             <button
@@ -89,7 +89,7 @@ export default function Header({
             className="flex items-center gap-1.5 px-3 py-2 rounded-xl text-xs font-semibold bg-cyan-950/80 border border-cyan-500/30 text-cyan-300 hover:bg-cyan-900/80 transition"
           >
             <Zap className="w-3.5 h-3.5" />
-            <span>RUN TRAJECTORY</span>
+            <span>RUN FULL TRAJECTORY</span>
           </button>
 
           <button
@@ -131,10 +131,10 @@ export default function Header({
       <div className="flex items-center justify-between border-t border-slate-800/80 pt-3 mt-3">
         <nav className="flex items-center gap-1">
           {[
-            { id: 'dashboard', label: 'Overview Dashboard', icon: Cpu },
-            { id: 'diagram', label: 'Bioreactor Diagram', icon: Activity },
+            { id: 'dashboard', label: 'Digital Twin', icon: Cpu },
+            { id: 'diagram', label: 'Process Diagram', icon: Activity },
             { id: 'scenarios', label: 'Scenario Comparison', icon: Layers },
-            { id: 'controller', label: 'Automated Controller', icon: Sliders },
+            { id: 'controller', label: 'Controller Audit', icon: Sliders },
             { id: 'faults', label: 'Fault Injection', icon: Zap },
           ].map((tab) => {
             const Icon = tab.icon;
