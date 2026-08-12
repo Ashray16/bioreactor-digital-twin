@@ -8,6 +8,7 @@ interface HeaderProps {
   onStep: () => void;
   onReset: () => void;
   onRunFull: () => void;
+  onRunDemo: () => void;
   onOpenConfig: () => void;
   simulationSpeed: number;
   setSimulationSpeed: (speed: number) => void;
@@ -22,6 +23,7 @@ export default function Header({
   onStep,
   onReset,
   onRunFull,
+  onRunDemo,
   onOpenConfig,
   simulationSpeed,
   setSimulationSpeed,
@@ -88,6 +90,15 @@ export default function Header({
           >
             <Zap className="w-3.5 h-3.5" />
             <span>RUN TRAJECTORY</span>
+          </button>
+
+          <button
+            onClick={onRunDemo}
+            className="flex items-center gap-1.5 px-3 py-2 rounded-xl text-xs font-bold bg-gradient-to-r from-emerald-500 to-cyan-500 hover:from-emerald-400 hover:to-cyan-400 text-black transition shadow-lg shadow-cyan-500/20"
+            title="Execute 1-Click Reproducible Hackathon Demo Story"
+          >
+            <Layers className="w-3.5 h-3.5 fill-current" />
+            <span>DEMO MODE</span>
           </button>
 
           {/* Speed Selector */}

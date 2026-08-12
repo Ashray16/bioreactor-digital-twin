@@ -20,6 +20,7 @@ import {
   getSimulationState,
   stepSimulation,
   runFullSimulation,
+  runDemoScenario,
 } from './services/api';
 
 export default function App() {
@@ -133,6 +134,20 @@ export default function App() {
     }
   };
 
+  const handleRunDemo = async () => {
+    setIsRunning(false);
+    setActiveTab('scenarios');
+    try {
+      const demoRes = await runDemoScenario();
+      if (demoRes && demoRes.comparison_result) {
+        setState(demoRes.comparison_result.controlled_scenario.current_state);
+        setHistory(demoRes.comparison_result.controlled_scenario.history);
+      }
+    } catch (err) {
+      console.error('Failed to execute demo scenario:', err);
+    }
+  };
+
   const handleRefreshState = async () => {
     try {
       const st = await getSimulationState();
@@ -168,6 +183,7 @@ export default function App() {
         onStep={handleStep}
         onReset={handleReset}
         onRunFull={handleRunFull}
+        onRunDemo={handleRunDemo}
         onOpenConfig={() => setIsConfigOpen(true)}
         simulationSpeed={simulationSpeed}
         setSimulationSpeed={setSimulationSpeed}

@@ -81,6 +81,15 @@ export async function runScenarioComparison(config?: Partial<BioreactorConfig>):
   return res.json();
 }
 
+export async function runDemoScenario(): Promise<any> {
+  const res = await fetch(`${API_BASE}/demo`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+  });
+  if (!res.ok) throw new Error(`Failed to run demo scenario: HTTP ${res.status}`);
+  return res.json();
+}
+
 export async function injectProcessFault(fault: FaultConfig): Promise<any> {
   const res = await fetch(`${API_BASE}/fault`, {
     method: 'POST',
