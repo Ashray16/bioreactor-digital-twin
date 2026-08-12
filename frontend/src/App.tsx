@@ -31,11 +31,13 @@ export default function App() {
   const [isRunning, setIsRunning] = useState(false);
   const [simulationSpeed, setSimulationSpeed] = useState(1);
   const [isConfigOpen, setIsConfigOpen] = useState(false);
+  const [initError, setInitError] = useState<string | null>(null);
 
   const timerRef = useRef<any>(null);
 
   // Initialize simulation engine baseline
   const initEngine = async (customConfig?: BioreactorConfig) => {
+    setInitError(null);
     try {
       const defaultConfig = customConfig || (await fetchDefaultConfig());
       setConfig(defaultConfig);
@@ -56,8 +58,9 @@ export default function App() {
           active_fault: initialState.active_fault,
         },
       ]);
-    } catch (err) {
+    } catch (err: any) {
       console.error('Failed to initialize simulation engine:', err);
+      setInitError(err.message || 'Could not connect to Digital Twin backend service.');
     }
   };
 
@@ -164,10 +167,25 @@ export default function App() {
 
   if (!state || !config) {
     return (
-      <div className="min-h-screen bg-[#0B0F17] text-slate-100 flex items-center justify-center p-6">
-        <div className="text-center space-y-3">
-          <div className="w-10 h-10 border-2 border-cyan-400 border-t-transparent rounded-full animate-spin mx-auto"></div>
-          <p className="text-xs text-slate-400 font-mono">Initializing Digital Twin Simulation Engine...</p>
+      <div className="min-h-screen bg-[#0B0F17] text-slate-100 flex items-center justify-center p-6 font-sans">
+        <div className="text-center space-y-4 max-w-md">
+          {initError ? (
+            <div className="p-6 bg-slate-900 border border-slate-800 rounded-2xl space-y-3">
+              <div className="text-rose-400 font-bold text-sm">Connection Error</div>
+              <p className="text-xs text-slate-400 font-mono">{initError}</p>
+              <button
+                onClick={() => initEngine()}
+                className="px-4 py-2 rounded-xl text-xs font-bold bg-cyan-500 hover:bg-cyan-400 text-black transition"
+              >
+                Retry Connection
+              </button>
+            </div>
+          ) : (
+            <>
+              <div className="w-10 h-10 border-2 border-cyan-400 border-t-transparent rounded-full animate-spin mx-auto"></div>
+              <p className="text-xs text-slate-400 font-mono">Initializing Digital Twin Simulation Engine...</p>
+            </>
+          )}
         </div>
       </div>
     );

@@ -6,7 +6,7 @@ import {
   FaultConfig,
 } from '../types/simulation';
 
-const API_BASE = '/api/v1/simulation';
+const API_BASE = 'http://127.0.0.1:8000/api/v1/simulation';
 
 export async function fetchDefaultConfig(): Promise<BioreactorConfig> {
   const res = await fetch(`${API_BASE}/config/default`);
