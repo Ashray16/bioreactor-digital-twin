@@ -1,4 +1,4 @@
-# Dependencies & Environments
+# Dependencies & Virtual Environments
 node_modules/
 .venv/
 venv/
@@ -7,20 +7,39 @@ env/
 __pycache__/
 *.pyc
 *.pyo
+*.pyd
 
-# Build Outputs
+# Build & Distribution Outputs
 dist/
 build/
 *.egg-info/
+frontend/dist/
 
-# IDE & OS
+# Environment Variables & Secrets
+.env
+.env.local
+.env.*.local
+*.pem
+*.key
+
+# IDEs & System Files
 .vscode/
 .idea/
+*.swp
+*.swo
 .DS_Store
 Thumbs.db
+ehthumbs.db
 
-# Logs & Temp
+# Testing, Logs & Caches
 *.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
 .pytest_cache/
+*/.pytest_cache/
 .coverage
 htmlcov/
+.eslintcache
+.cache/

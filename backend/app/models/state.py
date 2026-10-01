@@ -23,6 +23,7 @@ class BioreactorState(BaseModel):
     
     nutrient_concentration: float = Field(ge=0, description="Glucose concentration (g/L)")
     metabolite_concentration: float = Field(ge=0, description="Lactate concentration (g/L)")
+    product_concentration: float = Field(default=0.0, ge=0.0, description="Product / Titer concentration (g/L)")
     
     reactor_volume: float = Field(gt=0, description="Current working volume (L)")
     perfusion_rate: float = Field(ge=0, description="Current media exchange rate (VVD)")
@@ -47,6 +48,10 @@ class BioreactorState(BaseModel):
         default=None,
         description="Currently active simulated disturbance/fault if any",
     )
+    controller_actions: List[ControllerActionInfo] = Field(
+        default_factory=list,
+        description="Audit trail of all automated controller interventions in current run",
+    )
 
 
 class SimulationHistoryItem(BaseModel):
@@ -58,6 +63,7 @@ class SimulationHistoryItem(BaseModel):
     cell_viability: float
     nutrient_concentration: float
     metabolite_concentration: float
+    product_concentration: float = 0.0
     perfusion_rate: float
     fouling_index: float
     controller_enabled: bool
@@ -71,3 +77,5 @@ class SimulationResponse(BaseModel):
     current_state: BioreactorState
     history: List[SimulationHistoryItem]
     summary_metrics: dict
+    controller_actions: List[ControllerActionInfo] = Field(default_factory=list)
+

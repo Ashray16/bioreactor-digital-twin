@@ -25,6 +25,9 @@ class ControlSettingsPayload(BaseModel):
     nutrient_threshold_low: Optional[float] = Field(default=None, gt=0.0)
     metabolite_threshold_high: Optional[float] = Field(default=None, gt=0.0)
     fouling_threshold_high: Optional[float] = Field(default=None, ge=0.0, le=100.0)
+    step_increment_vvd: Optional[float] = Field(default=None, gt=0.0, le=2.0)
+    deadband_hours: Optional[float] = Field(default=None, ge=0.0, le=24.0)
+
 
 
 class SimulationStepPayload(BaseModel):
@@ -92,6 +95,24 @@ def run_full_simulation(config: Optional[BioreactorConfig] = None):
     return engine.run_full_simulation(cfg, controller=controller)
 
 
+@router.get("/control")
+def get_control_settings():
+    """Retrieve current automated controller configuration, thresholds, and recorded actions."""
+    global global_engine, global_controller
+    return {
+        "enabled": global_engine.config.control_enabled,
+        "mode": "rule_based",
+        "min_perfusion_rate": global_engine.config.min_perfusion_rate,
+        "max_perfusion_rate": global_engine.config.max_perfusion_rate,
+        "nutrient_threshold_low": getattr(global_controller, 'nutrient_threshold_low', 1.5),
+        "metabolite_threshold_high": getattr(global_controller, 'metabolite_threshold_high', 3.5),
+        "fouling_threshold_high": getattr(global_controller, 'fouling_threshold_high', 70.0),
+        "step_increment_vvd": getattr(global_controller, 'step_increment_vvd', 0.3),
+        "deadband_hours": getattr(global_controller, 'deadband_hours', 1.0),
+        "controller_actions": global_engine.controller_actions,
+    }
+
+
 @router.post("/control")
 def update_control_settings(payload: ControlSettingsPayload):
     """Update automated controller settings and operational thresholds."""
@@ -106,10 +127,18 @@ def update_control_settings(payload: ControlSettingsPayload):
         global_engine.config.max_perfusion_rate = payload.max_perfusion_rate
     if payload.nutrient_threshold_low is not None:
         global_controller.nutrient_threshold_low = payload.nutrient_threshold_low
+        global_engine.config.nutrient_threshold_low = payload.nutrient_threshold_low
     if payload.metabolite_threshold_high is not None:
         global_controller.metabolite_threshold_high = payload.metabolite_threshold_high
+        global_engine.config.metabolite_threshold_high = payload.metabolite_threshold_high
     if payload.fouling_threshold_high is not None:
         global_controller.fouling_threshold_high = payload.fouling_threshold_high
+        global_engine.config.fouling_threshold_high = payload.fouling_threshold_high
+    if payload.step_increment_vvd is not None:
+        global_controller.step_increment_vvd = payload.step_increment_vvd
+        global_engine.config.step_increment_vvd = payload.step_increment_vvd
+    if payload.deadband_hours is not None:
+        global_controller.deadband_hours = payload.deadband_hours
 
     return {
         "status": "updated",
@@ -118,12 +147,73 @@ def update_control_settings(payload: ControlSettingsPayload):
     }
 
 
+
+class ScenarioComparisonPayload(BaseModel):
+    preset: Optional[str] = Field(default="nutrient_stress", description="Scenario challenge preset: nutrient_stress | fouling_surge | cell_death | nominal")
+    config: Optional[BioreactorConfig] = None
+    fault: Optional[FaultConfig] = None
+    simulation_duration: Optional[float] = None
+    timestep: Optional[float] = None
+    initial_nutrient: Optional[float] = None
+    feed_nutrient_concentration: Optional[float] = None
+    perfusion_rate: Optional[float] = None
+
+
 @router.post("/scenario", response_model=ScenarioComparisonResponse)
-def run_scenario_comparison(config: Optional[BioreactorConfig] = None):
+def run_scenario_comparison(payload: Optional[ScenarioComparisonPayload] = None):
     """Execute side-by-side scenario comparison (Uncontrolled vs Controlled)."""
-    cfg = config or BioreactorConfig()
+    p = payload or ScenarioComparisonPayload()
+
+    # Base config
+    if p.config:
+        cfg = p.config.model_copy()
+    else:
+        cfg = BioreactorConfig()
+
+    # Overwrite with top-level fields if provided
+    if p.simulation_duration is not None:
+        cfg.simulation_duration = p.simulation_duration
+    if p.timestep is not None:
+        cfg.timestep = p.timestep
+    if p.initial_nutrient is not None:
+        cfg.initial_nutrient = p.initial_nutrient
+    if p.feed_nutrient_concentration is not None:
+        cfg.feed_nutrient_concentration = p.feed_nutrient_concentration
+    if p.perfusion_rate is not None:
+        cfg.perfusion_rate = p.perfusion_rate
+
+    # Setup fault based on preset or explicit fault
+    fault_mgr = None
+    if p.fault:
+        fault_mgr = FaultManager(p.fault)
+    elif p.preset == "nutrient_stress":
+        fault_mgr = FaultManager(FaultConfig(
+            fault_type="nutrient_reduction",
+            severity=0.9,
+            start_time=60.0,
+            duration=36.0,
+        ))
+    elif p.preset == "fouling_surge":
+        fault_mgr = FaultManager(FaultConfig(
+            fault_type="fouling_surge",
+            severity=0.85,
+            start_time=72.0,
+            duration=40.0,
+        ))
+    elif p.preset == "cell_death":
+        fault_mgr = FaultManager(FaultConfig(
+            fault_type="cell_death_surge",
+            severity=0.8,
+            start_time=60.0,
+            duration=30.0,
+        ))
+    elif p.preset == "nominal":
+        fault_mgr = None
+
+
     scenario_engine = ScenarioEngine(cfg)
-    return scenario_engine.run_comparison(cfg)
+    return scenario_engine.run_comparison(cfg, fault=fault_mgr)
+
 
 
 @router.post("/demo")
@@ -142,8 +232,14 @@ def run_demo_scenario():
         timestep=0.5,
         control_enabled=True,
     )
+    demo_fault = FaultManager(FaultConfig(
+        fault_type="nutrient_reduction",
+        severity=0.8,
+        start_time=15.0,
+        duration=35.0,
+    ))
     scenario_engine = ScenarioEngine(demo_config)
-    comparison = scenario_engine.run_comparison(demo_config)
+    comparison = scenario_engine.run_comparison(demo_config, fault=demo_fault)
     return {
         "status": "demo_executed",
         "story": "High-density perfusion digital twin simulation demonstrating adaptive rule-based control over 120 hours.",

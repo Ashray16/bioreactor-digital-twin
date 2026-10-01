@@ -53,13 +53,13 @@ class BioreactorConfig(BaseModel):
 
     # Nutrient (Glucose) Kinetics
     initial_nutrient: float = Field(
-        default=5.0,
+        default=3.0,
         ge=0,
         le=50.0,
         description="Initial glucose concentration (g/L)",
     )
     feed_nutrient_concentration: float = Field(
-        default=10.0,
+        default=7.0,
         gt=0,
         le=100.0,
         description="Nutrient concentration in fresh perfusion media feed (g/L)",
@@ -93,9 +93,23 @@ class BioreactorConfig(BaseModel):
         description="Lactate threshold for 50% cell growth inhibition K_i (g/L)",
     )
 
+    # Product (Titer / mAb) Formation Kinetics
+    initial_product: float = Field(
+        default=0.0,
+        ge=0,
+        le=50.0,
+        description="Initial product concentration / titer (g/L)",
+    )
+    specific_productivity_qp: float = Field(
+        default=1.0e-9,
+        ge=0,
+        le=1.0e-7,
+        description="Specific product productivity q_p (g/L/h per cell/mL, assumed ~24 pg/cell/day)",
+    )
+
     # Perfusion System Config
     perfusion_rate: float = Field(
-        default=1.0,
+        default=0.4,
         ge=0.0,
         le=10.0,
         description="Initial perfusion rate in Vessel Volumes per Day (VVD)",
@@ -132,6 +146,32 @@ class BioreactorConfig(BaseModel):
         description="Fouling index warning threshold (0-100)",
     )
 
+    # Adaptive Controller Thresholds & Gain
+    nutrient_threshold_low: float = Field(
+        default=2.0,
+        gt=0.0,
+        le=10.0,
+        description="Critical low glucose limit triggering perfusion increase (g/L)",
+    )
+    metabolite_threshold_high: float = Field(
+        default=3.5,
+        gt=0.0,
+        le=20.0,
+        description="Upper lactate toxicity limit triggering perfusion increase (g/L)",
+    )
+    fouling_threshold_high: float = Field(
+        default=70.0,
+        ge=0.0,
+        le=100.0,
+        description="Membrane fouling risk threshold triggering perfusion reduction (0-100)",
+    )
+    step_increment_vvd: float = Field(
+        default=0.3,
+        gt=0.0,
+        le=2.0,
+        description="Perfusion step size increment on nutrient/metabolite triggers (VVD)",
+    )
+
     # Operating Environment Parameters
     temperature: float = Field(
         default=37.0,
@@ -148,10 +188,10 @@ class BioreactorConfig(BaseModel):
 
     # Simulation Execution Controls
     simulation_duration: float = Field(
-        default=120.0,
+        default=240.0,
         gt=0,
         le=720.0,
-        description="Total simulation duration (hours)",
+        description="Total simulation duration (hours, e.g. 240h = 10 days)",
     )
     timestep: float = Field(
         default=0.5,
@@ -167,6 +207,7 @@ class BioreactorConfig(BaseModel):
         default="rule_based",
         description="Control mode strategy",
     )
+
 
     @model_validator(mode="after")
     def validate_bounds_and_perfusion(self):

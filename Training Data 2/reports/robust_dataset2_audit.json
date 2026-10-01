@@ -1,0 +1,118 @@
+{
+  "paper_clustering": {
+    "total_papers": 101,
+    "between_paper_variance": 2384.644,
+    "within_paper_variance": 1210.3439,
+    "intraclass_correlation_icc": 0.6633
+  },
+  "paper_aware_split": {
+    "train_papers": 70,
+    "train_rows": 816,
+    "val_papers": 15,
+    "val_rows": 102,
+    "test_papers": 16,
+    "test_rows": 210
+  },
+  "winning_model_selection": {
+    "selected_name": "HistGradientBoosting",
+    "target": "log1p",
+    "features": "ProcessOnly",
+    "val_r2": 0.2086,
+    "val_mae": 20.5603,
+    "val_rmse": 30.5088,
+    "val_medae": 6.4786
+  },
+  "test_set_evaluation": {
+    "test_mae": 7.1464,
+    "test_rmse": 18.1362,
+    "test_r2": 0.1479,
+    "test_medae": 1.4676
+  },
+  "error_by_titer_range": [
+    {
+      "range": "0\u20135 g/L",
+      "n": 172,
+      "mae": 2.030969622687011,
+      "rmse": 4.235283380673494,
+      "medae": 1.2519732909766441
+    },
+    {
+      "range": "5\u201325 g/L",
+      "n": 23,
+      "mae": 13.901833659585723,
+      "rmse": 15.835847160368852,
+      "medae": 14.566445484519917
+    },
+    {
+      "range": "25\u2013100 g/L",
+      "n": 12,
+      "mae": 43.453613808191015,
+      "rmse": 47.93767750617058,
+      "medae": 32.879585097379014
+    },
+    {
+      "range": "> 100 g/L",
+      "n": 3,
+      "mae": 103.41225930238211,
+      "rmse": 104.31345511430399,
+      "medae": 94.91031967363058
+    }
+  ],
+  "sample_similarity_matches": [
+    {
+      "paper_number": "50",
+      "product_name": "xylitol",
+      "strain_background": "HL27659k(pKK313)",
+      "observed_titer": 8.968,
+      "temperature": 37.0,
+      "substrate_conc": 59.94671403197158,
+      "reactor_volume": 0.6,
+      "fermentation_time": 50.0,
+      "normalized_distance": 0.3291
+    },
+    {
+      "paper_number": "50",
+      "product_name": "xylitol",
+      "strain_background": "HL51276k",
+      "observed_titer": 4.712,
+      "temperature": 37.0,
+      "substrate_conc": 59.94671403197158,
+      "reactor_volume": 0.6,
+      "fermentation_time": 50.0,
+      "normalized_distance": 0.3291
+    },
+    {
+      "paper_number": "50",
+      "product_name": "xylitol",
+      "strain_background": "HL27659k(pKK313C)",
+      "observed_titer": 6.688,
+      "temperature": 37.0,
+      "substrate_conc": 59.94671403197158,
+      "reactor_volume": 0.6,
+      "fermentation_time": 50.0,
+      "normalized_distance": 0.3291
+    },
+    {
+      "paper_number": "50",
+      "product_name": "xylitol",
+      "strain_background": "HL512769k",
+      "observed_titer": 6.84,
+      "temperature": 37.0,
+      "substrate_conc": 59.94671403197158,
+      "reactor_volume": 0.6,
+      "fermentation_time": 50.0,
+      "normalized_distance": 0.3291
+    },
+    {
+      "paper_number": "50",
+      "product_name": "xylitol",
+      "strain_background": "HL2765k(pKK313)",
+      "observed_titer": 6.992,
+      "temperature": 37.0,
+      "substrate_conc": 59.94671403197158,
+      "reactor_volume": 0.6,
+      "fermentation_time": 50.0,
+      "normalized_distance": 0.3291
+    }
+  ]
+}

@@ -13,6 +13,8 @@ export interface BioreactorConfig {
   initial_metabolite: number;
   cell_metabolite_yield: number;
   metabolite_inhibition_constant: number;
+  initial_product: number;
+  specific_productivity_qp: number;
   perfusion_rate: number;
   min_perfusion_rate: number;
   max_perfusion_rate: number;
@@ -25,7 +27,12 @@ export interface BioreactorConfig {
   timestep: number;
   control_enabled: boolean;
   control_mode: 'rule_based' | 'pid' | 'uncontrolled';
+  nutrient_threshold_low?: number;
+  metabolite_threshold_high?: number;
+  fouling_threshold_high?: number;
+  step_increment_vvd?: number;
 }
+
 
 export interface ControllerActionInfo {
   timestamp: number;
@@ -43,6 +50,7 @@ export interface BioreactorState {
   total_cell_density: number;
   nutrient_concentration: number;
   metabolite_concentration: number;
+  product_concentration: number;
   reactor_volume: number;
   perfusion_rate: number;
   fouling_index: number;
@@ -53,6 +61,7 @@ export interface BioreactorState {
   controller_enabled: boolean;
   latest_controller_action: ControllerActionInfo | null;
   active_fault: string | null;
+  controller_actions?: ControllerActionInfo[];
 }
 
 export interface SimulationHistoryItem {
@@ -62,6 +71,7 @@ export interface SimulationHistoryItem {
   cell_viability: number;
   nutrient_concentration: number;
   metabolite_concentration: number;
+  product_concentration: number;
   perfusion_rate: number;
   fouling_index: number;
   controller_enabled: boolean;
@@ -73,7 +83,9 @@ export interface SimulationResponse {
   current_state: BioreactorState;
   history: SimulationHistoryItem[];
   summary_metrics: Record<string, any>;
+  controller_actions?: ControllerActionInfo[];
 }
+
 
 export interface ScenarioComparisonItem {
   metric_name: string;
@@ -91,8 +103,9 @@ export interface ScenarioComparisonResponse {
   comparison_table: ScenarioComparisonItem[];
   total_media_consumed_uncontrolled_L: number;
   total_media_consumed_controlled_L: number;
-  overall_outcome: 'IMPROVED' | 'NO_SIGNIFICANT_CHANGE' | 'DEGRADED';
+  overall_outcome: 'IMPROVED' | 'TRADE-OFF' | 'NO_SIGNIFICANT_CHANGE' | 'DEGRADED';
   outcome_summary: string;
+  divergence_cause?: string | null;
 }
 
 export interface FaultConfig {
@@ -100,4 +113,90 @@ export interface FaultConfig {
   severity: number;
   start_time: number;
   duration: number;
+}
+
+export interface QuantileBand {
+  p5: number;
+  p25: number;
+  median: number;
+  p75: number;
+  p95: number;
+}
+
+export interface FanPoint {
+  time: number;
+  uncontrolled: QuantileBand;
+  controlled: QuantileBand;
+}
+
+export interface DistributionStats {
+  n: number;
+  mean: number;
+  median: number;
+  std_dev: number;
+  ci_90_low: number;
+  ci_90_high: number;
+  min: number;
+  max: number;
+  unit: string;
+}
+
+export interface HistogramBin {
+  bin_index: number;
+  bin_min: number;
+  bin_max: number;
+  bin_center: number;
+  label: string;
+  uncontrolled_count: number;
+  controlled_count: number;
+  uncontrolled_pct: number;
+  controlled_pct: number;
+}
+
+export interface ParameterPerturbationMeta {
+  parameter: string;
+  symbol: string;
+  range: string;
+  nominal: number;
+  unit: string;
+}
+
+export interface MonteCarloResponse {
+  num_runs: number;
+  simulation_duration_hours: number;
+  timestep_hours: number;
+  parameters_perturbed: ParameterPerturbationMeta[];
+  fan_chart: FanPoint[];
+  uncontrolled_stats: DistributionStats;
+  controlled_stats: DistributionStats;
+  histogram_bins: HistogramBin[];
+  summary_insight: string;
+}
+
+export interface TornadoParameterResult {
+  param_key: string;
+  name: string;
+  symbol: string;
+  unit: string;
+  category: string;
+  nominal_value: number;
+  low_value: number;
+  high_value: number;
+  vcc_low: number;
+  vcc_high: number;
+  delta_low: number;
+  delta_high: number;
+  swing: number;
+  impact_share_pct: number;
+}
+
+export interface SensitivityResponse {
+  analysis_type: string;
+  perturbation_pct: number;
+  baseline_vcc: number;
+  unit: string;
+  parameters: TornadoParameterResult[];
+  total_swing: number;
+  top_two_share_pct: number;
+  insight_summary: string;
 }

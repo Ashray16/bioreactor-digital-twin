@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect, useRef, lazy, Suspense } from 'react';
 import Sidebar from './components/layout/Sidebar';
 import HeaderBar from './components/layout/HeaderBar';
 import KpiCards from './components/dashboard/KpiCards';
@@ -6,15 +6,20 @@ import ProcessCharts from './components/dashboard/ProcessCharts';
 import BioreactorDiagram from './components/dashboard/BioreactorDiagram';
 import ControllerPanel from './components/dashboard/ControllerPanel';
 import EventLog from './components/dashboard/EventLog';
-import ScenarioComparisonView from './components/dashboard/ScenarioComparisonView';
-import FaultInjectionPanel from './components/dashboard/FaultInjectionPanel';
-import AnalyticsPage from './components/dashboard/AnalyticsPage';
 import ConfigModal from './components/dashboard/ConfigModal';
+import { useToast } from './context/ToastContext';
 
+const ScenarioComparisonView = lazy(() => import('./components/dashboard/ScenarioComparisonView'));
+const FaultInjectionPanel = lazy(() => import('./components/dashboard/FaultInjectionPanel'));
+const AnalyticsPage = lazy(() => import('./components/dashboard/AnalyticsPage'));
+const AIProcessIntelligence = lazy(() => import('./components/dashboard/AIProcessIntelligence'));
+
+import { Loader2 } from 'lucide-react';
 import {
   BioreactorConfig,
   BioreactorState,
   SimulationHistoryItem,
+  FaultConfig,
 } from './types/simulation';
 import {
   fetchDefaultConfig,
@@ -25,17 +30,41 @@ import {
   runDemoScenario,
 } from './services/api';
 
+const PageLoader = () => (
+  <div className="flex flex-col items-center justify-center min-h-[400px] gap-3 text-slate-500">
+    <Loader2 className="w-8 h-8 text-blue-600 animate-spin" />
+    <p className="text-xs font-medium font-mono">Loading workspace view...</p>
+  </div>
+);
+
 export default function App() {
-  const [activeTab, setActiveTab] = useState<'dashboard' | 'diagram' | 'scenarios' | 'controller' | 'faults' | 'analytics'>('dashboard');
+  const [activeTab, setActiveTab] = useState<'dashboard' | 'diagram' | 'scenarios' | 'controller' | 'faults' | 'analytics' | 'ai-analytics'>('dashboard');
   const [config, setConfig] = useState<BioreactorConfig | null>(null);
   const [state, setState] = useState<BioreactorState | null>(null);
   const [history, setHistory] = useState<SimulationHistoryItem[]>([]);
+  const [activeFault, setActiveFault] = useState<FaultConfig | null>(null);
   const [isRunning, setIsRunning] = useState(false);
   const [simulationSpeed, setSimulationSpeed] = useState(1);
   const [isConfigOpen, setIsConfigOpen] = useState(false);
+  const [isMobileNavOpen, setIsMobileNavOpen] = useState(false);
   const [initError, setInitError] = useState<string | null>(null);
 
+  const { showSuccess, showError, showInfo } = useToast();
   const timerRef = useRef<any>(null);
+
+  // Dynamic Document Title per Active Tab (Section 4)
+  useEffect(() => {
+    const titles: Record<string, string> = {
+      'dashboard': 'Bioprocess Digital Twin | Overview',
+      'diagram': 'Bioprocess Digital Twin | Live Reactor & Process Flow',
+      'scenarios': 'Bioprocess Digital Twin | Scenario Comparison',
+      'controller': 'Bioprocess Digital Twin | Control Center',
+      'faults': 'Bioprocess Digital Twin | Fault Analysis',
+      'analytics': 'Bioprocess Digital Twin | Process Analytics',
+      'ai-analytics': 'Bioprocess Digital Twin | AI Process Intelligence',
+    };
+    document.title = titles[activeTab] || 'Bioprocess Digital Twin | CHO Perfusion';
+  }, [activeTab]);
 
   // Initialize simulation engine baseline
   const initEngine = async (customConfig?: BioreactorConfig) => {
@@ -54,15 +83,21 @@ export default function App() {
           cell_viability: initialState.cell_viability,
           nutrient_concentration: initialState.nutrient_concentration,
           metabolite_concentration: initialState.metabolite_concentration,
+          product_concentration: initialState.product_concentration,
           perfusion_rate: initialState.perfusion_rate,
           fouling_index: initialState.fouling_index,
           controller_enabled: initialState.controller_enabled,
           active_fault: initialState.active_fault,
         },
       ]);
+      if (customConfig) {
+        showSuccess('Digital Twin parameters updated and re-initialized.');
+      }
     } catch (err: any) {
       console.error('Failed to initialize simulation engine:', err);
-      setInitError(err.message || 'Could not connect to Digital Twin backend service.');
+      const msg = err.message || 'Digital Twin backend is unavailable. Start the API service and retry.';
+      setInitError(msg);
+      showError(msg);
     }
   };
 
@@ -84,6 +119,7 @@ export default function App() {
           cell_viability: round(newState.cell_viability, 2),
           nutrient_concentration: round(newState.nutrient_concentration, 3),
           metabolite_concentration: round(newState.metabolite_concentration, 3),
+          product_concentration: round(newState.product_concentration, 3),
           perfusion_rate: round(newState.perfusion_rate, 2),
           fouling_index: round(newState.fouling_index, 1),
           controller_enabled: newState.controller_enabled,
@@ -93,9 +129,11 @@ export default function App() {
 
       if (config && newState.simulation_time >= config.simulation_duration) {
         setIsRunning(false);
+        showSuccess('Simulation reached final duration (120 h).');
       }
-    } catch (err) {
+    } catch (err: any) {
       console.error('Failed to step simulation:', err);
+      showError('Failed to advance simulation timestep.');
       setIsRunning(false);
     }
   };
@@ -123,6 +161,7 @@ export default function App() {
     setIsRunning(false);
     if (config) {
       await initEngine(config);
+      showInfo('Digital Twin reset to initial baseline state (t = 0.0 h).');
     }
   };
 
@@ -133,8 +172,10 @@ export default function App() {
       const response = await runFullSimulation(config);
       setState(response.current_state);
       setHistory(response.history);
-    } catch (err) {
+      showSuccess('120 h simulation completed successfully.');
+    } catch (err: any) {
       console.error('Failed to run full simulation:', err);
+      showError('Failed to complete full simulation run.');
     }
   };
 
@@ -146,9 +187,11 @@ export default function App() {
       if (demoRes && demoRes.comparison_result) {
         setState(demoRes.comparison_result.controlled_scenario.current_state);
         setHistory(demoRes.comparison_result.controlled_scenario.history);
+        showSuccess('Demo scenario loaded: closed-loop control recovery demonstrated.');
       }
-    } catch (err) {
+    } catch (err: any) {
       console.error('Failed to execute demo scenario:', err);
+      showError('Failed to execute demo scenario.');
     }
   };
 
@@ -159,6 +202,12 @@ export default function App() {
     } catch (err) {
       console.error('Failed to refresh state:', err);
     }
+  };
+
+  const handleFaultInjected = (fault: FaultConfig) => {
+    setActiveFault(fault);
+    setActiveTab('scenarios');
+    showSuccess(`Injected ${fault.fault_type.replace(/_/g, ' ')} (t=${fault.start_time.toFixed(0)}h–${(fault.start_time + fault.duration).toFixed(0)}h). Comparing scenarios with disturbance active.`);
   };
 
   const round = (val: number, decimals: number) => {
@@ -172,11 +221,11 @@ export default function App() {
         <div className="text-center space-y-4 max-w-md">
           {initError ? (
             <div className="p-6 bg-white border border-slate-200 rounded-2xl shadow-sm space-y-3">
-              <div className="text-red-600 font-bold text-sm">Connection Error</div>
-              <p className="text-xs text-slate-500 font-mono">{initError}</p>
+              <div className="text-rose-600 font-bold text-sm">Connection Error</div>
+              <p className="text-xs text-slate-600 font-mono leading-relaxed">{initError}</p>
               <button
                 onClick={() => initEngine()}
-                className="px-4 py-2 rounded-xl text-xs font-bold bg-blue-600 hover:bg-blue-700 text-white transition"
+                className="px-4 py-2 rounded-xl text-xs font-bold bg-blue-600 hover:bg-blue-700 text-white transition shadow-xs"
               >
                 Retry Connection
               </button>
@@ -194,11 +243,16 @@ export default function App() {
 
   return (
     <div className="flex min-h-screen bg-[#F7F8FA] text-slate-900 font-sans selection:bg-blue-100 selection:text-blue-900">
-      {/* Persistent Left Navigation Sidebar */}
+      {/* Persistent Left Navigation Sidebar + Mobile Drawer */}
       <Sidebar
         activeTab={activeTab}
         setActiveTab={setActiveTab}
         onOpenConfig={() => setIsConfigOpen(true)}
+        isOpenMobile={isMobileNavOpen}
+        onCloseMobile={() => setIsMobileNavOpen(false)}
+        state={state}
+        isRunning={isRunning}
+        activeFault={activeFault}
       />
 
       {/* Main Workspace Layout */}
@@ -214,44 +268,113 @@ export default function App() {
           simulationSpeed={simulationSpeed}
           setSimulationSpeed={setSimulationSpeed}
           simulationTime={state.simulation_time}
+          onToggleMobileNav={() => setIsMobileNavOpen((prev) => !prev)}
         />
 
-        <main className="flex-1 p-6 space-y-6 max-w-7xl w-full mx-auto">
+        <main className="flex-1 p-4 sm:p-6 space-y-4 max-w-[1600px] w-full mx-auto">
           {/* 1. Overview Dashboard */}
           {activeTab === 'dashboard' && (
-            <div className="space-y-6">
-              <KpiCards state={state} />
-              <ProcessCharts history={history} targetCellDensity={state.target_cell_density} />
-              <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+            <div className="space-y-4">
+              <h2 className="sr-only">Process Simulation Dashboard Overview</h2>
+              <KpiCards state={state} history={history} />
+              <ProcessCharts
+                history={history}
+                targetCellDensity={state?.target_cell_density ?? 1e8}
+                disturbanceWindow={activeFault ? {
+                  start: activeFault.start_time,
+                  end: activeFault.start_time + activeFault.duration,
+                  label: `Injected Disturbance: ${activeFault.fault_type.replace(/_/g, ' ')}`,
+                } : null}
+              />
+              <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
                 <div className="lg:col-span-2">
-                  <ControllerPanel state={state} onRefreshState={handleRefreshState} />
+                  {state && (
+                    <ControllerPanel
+                      state={state}
+                      config={config}
+                      history={history}
+                      onRefreshState={handleRefreshState}
+                    />
+                  )}
                 </div>
                 <div>
-                  <EventLog history={history} latestAction={state.latest_controller_action} activeFault={state.active_fault} />
+                  <EventLog history={history} latestAction={state?.latest_controller_action ?? null} activeFault={state?.active_fault ?? null} targetCellDensity={state?.target_cell_density ?? 1e8} />
                 </div>
               </div>
             </div>
           )}
 
-          {/* 2. Process Flow View */}
-          {activeTab === 'diagram' && <BioreactorDiagram state={state} />}
+          {activeTab === 'diagram' && (
+            <div className="space-y-6">
+              <h2 className="sr-only">Bioreactor Flow Diagram</h2>
+              <BioreactorDiagram state={state} focus="flow" config={config} isRunning={isRunning} />
+            </div>
+          )}
 
           {/* 3. Scenario Comparison View */}
-          {activeTab === 'scenarios' && <ScenarioComparisonView />}
+          {activeTab === 'scenarios' && (
+            <Suspense fallback={<PageLoader />}>
+              <ScenarioComparisonView
+                activeFault={activeFault}
+                onClearFault={() => {
+                  setActiveFault(null);
+                  showInfo('Injected disturbance cleared. Baseline challenge restored.');
+                }}
+                onNavigateToFaults={() => setActiveTab('faults')}
+              />
+            </Suspense>
+          )}
 
           {/* 4. Automated Controller Panel */}
           {activeTab === 'controller' && (
-            <ControllerPanel state={state} onRefreshState={handleRefreshState} />
+            <ControllerPanel
+              state={state}
+              config={config}
+              history={history}
+              onRefreshState={handleRefreshState}
+            />
           )}
+
 
           {/* 5. Process Disturbance & Fault Analysis */}
           {activeTab === 'faults' && (
-            <FaultInjectionPanel onRefreshState={handleRefreshState} />
+            <Suspense fallback={<PageLoader />}>
+              <FaultInjectionPanel
+                onRefreshState={handleRefreshState}
+                onInjectSuccess={handleFaultInjected}
+                onNavigateToTab={(tab) => setActiveTab(tab)}
+              />
+            </Suspense>
           )}
 
           {/* 6. Advanced Process Analytics & Monte Carlo */}
-          {activeTab === 'analytics' && <AnalyticsPage state={state} />}
+          {activeTab === 'analytics' && (
+            <Suspense fallback={<PageLoader />}>
+              <AnalyticsPage state={state} />
+            </Suspense>
+          )}
+
+          {/* 7. AI Process Intelligence & Benchmark */}
+          {activeTab === 'ai-analytics' && (
+            <Suspense fallback={<PageLoader />}>
+              <AIProcessIntelligence
+                state={state}
+                config={config}
+                onCompareWithTwin={() => setActiveTab('dashboard')}
+              />
+            </Suspense>
+          )}
         </main>
+
+        {/* 12. Standard Footer */}
+        <footer className="mt-auto py-4 px-6 border-t border-slate-200 bg-white text-xs text-slate-600 flex flex-col sm:flex-row items-center justify-between gap-2">
+          <div>© 2026 Bioprocess Digital Twin. CHO Perfusion Bioreactor Platform.</div>
+          <div className="flex items-center gap-3 text-[11px] font-mono text-slate-500">
+            <span>Solver: RK4 ODE</span>
+            <span>•</span>
+            <span>Dual Mechanistic &amp; AI Intelligence</span>
+          </div>
+        </footer>
       </div>
 
       {/* Configuration Parameters Modal */}

@@ -14,7 +14,7 @@ def test_scenario_comparison_execution():
 
     assert res.uncontrolled_scenario is not None
     assert res.controlled_scenario is not None
-    assert len(res.comparison_table) == 6
+    assert len(res.comparison_table) == 7
     assert res.total_media_consumed_uncontrolled_L > 0.0
     assert res.total_media_consumed_controlled_L > 0.0
 

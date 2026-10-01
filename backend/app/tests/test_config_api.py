@@ -10,7 +10,7 @@ def test_get_default_configuration():
     data = response.json()
     assert data["target_cell_density"] == 1.0e8
     assert data["reactor_volume"] == 2.0
-    assert data["perfusion_rate"] == 1.0
+    assert data["perfusion_rate"] == 0.4
 
 
 def test_validate_configuration_success():

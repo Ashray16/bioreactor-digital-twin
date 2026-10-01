@@ -14,6 +14,7 @@ from app.models.state import (
 from app.simulation.cell_growth import calculate_cell_density_derivatives
 from app.simulation.nutrients import calculate_nutrient_derivative
 from app.simulation.metabolites import calculate_metabolite_derivative
+from app.simulation.product import calculate_product_derivative
 from app.simulation.fouling import calculate_fouling_index
 
 
@@ -22,6 +23,7 @@ class SimulationEngine:
 
     def __init__(self, config: Optional[BioreactorConfig] = None):
         self.config = config or BioreactorConfig()
+        self.controller_actions: List[ControllerActionInfo] = []
         self.current_state = self._initialize_state()
         self.history: List[SimulationHistoryItem] = []
         self._record_history()
@@ -47,6 +49,7 @@ class SimulationEngine:
             total_cell_density=total,
             nutrient_concentration=self.config.initial_nutrient,
             metabolite_concentration=self.config.initial_metabolite,
+            product_concentration=self.config.initial_product,
             reactor_volume=self.config.reactor_volume,
             perfusion_rate=self.config.perfusion_rate,
             fouling_index=fouling_idx,
@@ -57,16 +60,19 @@ class SimulationEngine:
             controller_enabled=self.config.control_enabled,
             latest_controller_action=None,
             active_fault=None,
+            controller_actions=[],
         )
 
     def reset(self, config: Optional[BioreactorConfig] = None) -> BioreactorState:
         """Reset simulation engine state back to t=0."""
         if config is not None:
             self.config = config
+        self.controller_actions = []
         self.current_state = self._initialize_state()
         self.history = []
         self._record_history()
         return self.current_state
+
 
     def _record_history(self):
         self.history.append(
@@ -77,6 +83,7 @@ class SimulationEngine:
                 cell_viability=round(self.current_state.cell_viability, 2),
                 nutrient_concentration=round(self.current_state.nutrient_concentration, 3),
                 metabolite_concentration=round(self.current_state.metabolite_concentration, 3),
+                product_concentration=round(self.current_state.product_concentration, 3),
                 perfusion_rate=round(self.current_state.perfusion_rate, 2),
                 fouling_index=round(self.current_state.fouling_index, 1),
                 controller_enabled=self.current_state.controller_enabled,
@@ -85,14 +92,14 @@ class SimulationEngine:
         )
 
     def _compute_derivatives(
-        self, Xv: float, Xd: float, S: float, P: float, perfusion: float
-    ) -> tuple[float, float, float, float]:
-        """Compute state derivatives (dXv/dt, dXd/dt, dS/dt, dP/dt)."""
+        self, Xv: float, Xd: float, S: float, P_lac: float, Pt: float, perfusion: float
+    ) -> tuple[float, float, float, float, float]:
+        """Compute state derivatives (dXv/dt, dXd/dt, dS/dt, dP_lac/dt, dPt/dt)."""
         dXv, dXd = calculate_cell_density_derivatives(
             viable_cells=Xv,
             nonviable_cells=Xd,
             nutrient=S,
-            metabolite=P,
+            metabolite=P_lac,
             perfusion_rate_vvd=perfusion,
             config=self.config,
         )
@@ -102,13 +109,19 @@ class SimulationEngine:
             perfusion_rate_vvd=perfusion,
             config=self.config,
         )
-        dP = calculate_metabolite_derivative(
-            metabolite=P,
+        dP_lac = calculate_metabolite_derivative(
+            metabolite=P_lac,
             viable_cells=Xv,
             perfusion_rate_vvd=perfusion,
             config=self.config,
         )
-        return dXv, dXd, dS, dP
+        dPt = calculate_product_derivative(
+            product=Pt,
+            viable_cells=Xv,
+            perfusion_rate_vvd=perfusion,
+            config=self.config,
+        )
+        return dXv, dXd, dS, dP_lac, dPt
 
     def step(
         self,
@@ -127,50 +140,56 @@ class SimulationEngine:
             if action_info:
                 perfusion = action_info.current_perfusion
                 state.latest_controller_action = action_info
+                self.controller_actions.append(action_info)
 
-        # 2. RK4 ODE Integration
-        Xv0, Xd0, S0, P0 = (
+        # 2. RK4 ODE Integration (5 State Variables: Xv, Xd, S, P, Pt)
+        Xv0, Xd0, S0, P0, Pt0 = (
             state.viable_cell_density,
             state.nonviable_cell_density,
             state.nutrient_concentration,
             state.metabolite_concentration,
+            state.product_concentration,
         )
 
         # k1
-        k1_Xv, k1_Xd, k1_S, k1_P = self._compute_derivatives(Xv0, Xd0, S0, P0, perfusion)
+        k1_Xv, k1_Xd, k1_S, k1_P, k1_Pt = self._compute_derivatives(Xv0, Xd0, S0, P0, Pt0, perfusion)
 
         # k2
-        k2_Xv, k2_Xd, k2_S, k2_P = self._compute_derivatives(
+        k2_Xv, k2_Xd, k2_S, k2_P, k2_Pt = self._compute_derivatives(
             max(0.0, Xv0 + 0.5 * h * k1_Xv),
             max(0.0, Xd0 + 0.5 * h * k1_Xd),
             max(0.0, S0 + 0.5 * h * k1_S),
             max(0.0, P0 + 0.5 * h * k1_P),
+            max(0.0, Pt0 + 0.5 * h * k1_Pt),
             perfusion,
         )
 
         # k3
-        k3_Xv, k3_Xd, k3_S, k3_P = self._compute_derivatives(
+        k3_Xv, k3_Xd, k3_S, k3_P, k3_Pt = self._compute_derivatives(
             max(0.0, Xv0 + 0.5 * h * k2_Xv),
             max(0.0, Xd0 + 0.5 * h * k2_Xd),
             max(0.0, S0 + 0.5 * h * k2_S),
             max(0.0, P0 + 0.5 * h * k2_P),
+            max(0.0, Pt0 + 0.5 * h * k2_Pt),
             perfusion,
         )
 
         # k4
-        k4_Xv, k4_Xd, k4_S, k4_P = self._compute_derivatives(
+        k4_Xv, k4_Xd, k4_S, k4_P, k4_Pt = self._compute_derivatives(
             max(0.0, Xv0 + h * k3_Xv),
             max(0.0, Xd0 + h * k3_Xd),
             max(0.0, S0 + h * k3_S),
             max(0.0, P0 + h * k3_P),
+            max(0.0, Pt0 + h * k3_Pt),
             perfusion,
         )
 
-        # Updated states
+        # Updated states with physical non-negativity constraint enforcement
         new_Xv = max(0.0, Xv0 + (h / 6.0) * (k1_Xv + 2 * k2_Xv + 2 * k3_Xv + k4_Xv))
         new_Xd = max(0.0, Xd0 + (h / 6.0) * (k1_Xd + 2 * k2_Xd + 2 * k3_Xd + k4_Xd))
         new_S = max(0.0, S0 + (h / 6.0) * (k1_S + 2 * k2_S + 2 * k3_S + k4_S))
         new_P = max(0.0, P0 + (h / 6.0) * (k1_P + 2 * k2_P + 2 * k3_P + k4_P))
+        new_Pt = max(0.0, Pt0 + (h / 6.0) * (k1_Pt + 2 * k2_Pt + 2 * k3_Pt + k4_Pt))
 
         total_cells = new_Xv + new_Xd
         viability = (new_Xv / total_cells * 100.0) if total_cells > 0 else 0.0
@@ -200,6 +219,7 @@ class SimulationEngine:
             total_cell_density=total_cells,
             nutrient_concentration=new_S,
             metabolite_concentration=new_P,
+            product_concentration=new_Pt,
             reactor_volume=self.config.reactor_volume,
             perfusion_rate=perfusion,
             fouling_index=fouling_idx,
@@ -210,6 +230,7 @@ class SimulationEngine:
             controller_enabled=state.controller_enabled or self.config.control_enabled,
             latest_controller_action=state.latest_controller_action,
             active_fault=active_fault,
+            controller_actions=list(self.controller_actions),
         )
 
         self._record_history()
@@ -235,12 +256,15 @@ class SimulationEngine:
         max_fouling = max(h.fouling_index for h in self.history) if self.history else 0.0
         min_nutrient = min(h.nutrient_concentration for h in self.history) if self.history else 0.0
         max_metabolite = max(h.metabolite_concentration for h in self.history) if self.history else 0.0
+        max_product = max(h.product_concentration for h in self.history) if self.history else 0.0
 
         summary = {
             "final_viable_cell_density": final_st.viable_cell_density,
             "final_cell_viability": final_st.cell_viability,
             "final_nutrient_concentration": final_st.nutrient_concentration,
             "final_metabolite_concentration": final_st.metabolite_concentration,
+            "final_product_concentration": final_st.product_concentration,
+            "maximum_product_concentration": max_product,
             "maximum_fouling_index": max_fouling,
             "final_fouling_index": final_st.fouling_index,
             "final_perfusion_rate": final_st.perfusion_rate,
@@ -254,4 +278,6 @@ class SimulationEngine:
             current_state=final_st,
             history=self.history,
             summary_metrics=summary,
+            controller_actions=list(self.controller_actions),
         )
+

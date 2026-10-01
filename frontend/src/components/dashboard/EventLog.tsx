@@ -1,39 +1,58 @@
 import { SimulationHistoryItem, ControllerActionInfo } from '../../types/simulation';
-import { List, CheckCircle2, AlertTriangle, ShieldCheck, Zap } from 'lucide-react';
+import { useAI } from '../../context/AIContext';
+import { CheckCircle2, ShieldCheck, Zap, Sparkles } from 'lucide-react';
 
 interface EventLogProps {
   history: SimulationHistoryItem[];
   latestAction: ControllerActionInfo | null;
   activeFault: string | null;
+  targetCellDensity: number;
 }
 
-export default function EventLog({ history, latestAction, activeFault }: EventLogProps) {
-  const events: Array<{ time: number; type: 'info' | 'warning' | 'control' | 'fault'; title: string; desc: string }> = [];
+export default function EventLog({ history, latestAction, activeFault, targetCellDensity }: EventLogProps) {
+  const { analysisHistory } = useAI();
+
+  const formatDensity = (density: number) => {
+    if (density >= 1e8) {
+      return `${(density / 1e8).toFixed(2)} × 10⁸`;
+    } else if (density >= 1e7) {
+      return `${(density / 1e7).toFixed(2)} × 10⁷`;
+    } else {
+      return `${(density / 1e6).toFixed(2)} × 10⁶`;
+    }
+  };
+
+  const events: Array<{
+    time: number;
+    category: 'PROCESS' | 'CONTROL' | 'FAULT' | 'AI';
+    title: string;
+    desc: string;
+  }> = [];
 
   if (history.length > 0) {
     events.push({
       time: 0.0,
-      type: 'info',
+      category: 'PROCESS',
       title: 'Simulation Initialized',
       desc: 'Digital twin state created with baseline cell density.',
     });
   }
 
   history.forEach((h) => {
-    if (h.viable_cell_density >= 1.0e8 && !events.some((e) => e.title === 'Target Cell Density Reached')) {
+    if (h.viable_cell_density >= targetCellDensity && !events.some((e) => e.title === 'Target Cell Density Reached')) {
       events.push({
         time: h.time,
-        type: 'info',
+        category: 'PROCESS',
         title: 'Target Cell Density Reached',
-        desc: `Cell density crossed >1.00 × 10⁸ cells/mL goal benchmark.`,
+        desc: `Cell density crossed >${formatDensity(targetCellDensity)} cells/mL goal benchmark at t=${h.time.toFixed(1)}h.`,
       });
     }
 
-    if (h.fouling_index >= 70.0 && !events.some((e) => e.time === h.time && e.type === 'warning')) {
+    if (h.fouling_index >= 70.0 && !events.some((e) => e.time === h.time && e.category === 'PROCESS' && e.title.includes('Fouling'))) {
       events.push({
         time: h.time,
-        type: 'warning',
-        title: 'Filter Fouling Risk Warning',
+        category: 'PROCESS',
+        title: 'Filter Fouling Warning',
         desc: `Fouling risk index elevated to ${h.fouling_index.toFixed(1)} / 100 (HIGH).`,
       });
     }
@@ -41,20 +60,20 @@ export default function EventLog({ history, latestAction, activeFault }: EventLo
     if (h.nutrient_concentration < 1.5 && !events.some((e) => e.time === h.time && e.title.includes('Low Glucose'))) {
       events.push({
         time: h.time,
-        type: 'warning',
+        category: 'PROCESS',
         title: 'Low Glucose Alert',
-        desc: `Substrate concentration dropped to ${h.nutrient_concentration.toFixed(2)} g/L.`,
+        desc: `Substrate concentration dropped to ${h.nutrient_concentration.toFixed(2)} g/L (<1.5 g/L).`,
       });
     }
   });
 
   if (latestAction) {
-    if (!events.some((e) => e.time === latestAction.timestamp && e.type === 'control')) {
+    if (!events.some((e) => e.time === latestAction.timestamp && e.category === 'CONTROL')) {
       events.push({
         time: latestAction.timestamp,
-        type: 'control',
+        category: 'CONTROL',
         title: `Controller Action: ${latestAction.action_type}`,
-        desc: latestAction.reason,
+        desc: `${latestAction.reason} (${latestAction.previous_perfusion.toFixed(2)} → ${latestAction.current_perfusion.toFixed(2)} VVD).`,
       });
     }
   }
@@ -62,50 +81,66 @@ export default function EventLog({ history, latestAction, activeFault }: EventLo
   if (activeFault) {
     events.push({
       time: history.length > 0 ? history[history.length - 1].time : 0.0,
-      type: 'fault',
+      category: 'FAULT',
       title: 'Process Disturbance Active',
       desc: activeFault,
     });
   }
 
+  // Include user-executed AI process intelligence events
+  analysisHistory.forEach((item) => {
+    events.push({
+      time: item.simulationTime,
+      category: 'AI',
+      title: `AI Process Analysis Executed`,
+      desc: `HistGradientBoosting v1.0 prediction: ${item.prediction.prediction.toFixed(2)} g/L titer (Source: ${item.source}).`,
+    });
+  });
+
   events.sort((a, b) => b.time - a.time);
 
   return (
-    <div className="glass-panel p-6 rounded-xl border border-slate-200 space-y-4 bg-white">
-      <div className="flex items-center justify-between border-b border-slate-200 pb-3">
-        <h3 className="text-xs font-bold text-slate-900 flex items-center gap-2 uppercase tracking-wider">
-          <List className="w-4 h-4 text-blue-600" />
-          Real-Time Process Event Stream
-        </h3>
-        <span className="text-[11px] font-mono text-slate-500">{events.length} Events</span>
+    <div className="border border-slate-200 rounded-md p-4 space-y-3 bg-white shadow-none font-sans">
+      <div className="flex items-center justify-between border-b border-slate-100 pb-2.5">
+        <h2 className="text-xs font-semibold text-slate-800 uppercase tracking-wide">
+          Process Event Stream
+        </h2>
+        <span className="text-[11px] font-mono text-slate-400">{events.length} Events</span>
       </div>
 
-      <div className="space-y-2.5 max-h-72 overflow-y-auto pr-1">
+      <div className="space-y-2 max-h-72 overflow-y-auto pr-1">
         {events.map((ev, idx) => (
           <div
             key={idx}
-            className={`p-3 rounded-lg border text-xs flex items-start gap-3 transition ${
-              ev.type === 'control'
-                ? 'bg-blue-50 border-blue-200 text-blue-900'
-                : ev.type === 'warning'
-                ? 'bg-amber-50 border-amber-200 text-amber-900'
-                : ev.type === 'fault'
-                ? 'bg-red-50 border-red-200 text-red-900'
-                : 'bg-slate-50 border-slate-200 text-slate-700'
+            className={`p-2.5 rounded-md border text-xs flex items-start gap-2.5 transition ${
+              ev.category === 'FAULT'
+                ? 'bg-rose-50/60 border-rose-200 text-rose-950'
+                : 'bg-slate-50/70 border-slate-200/70 text-slate-700'
             }`}
           >
             <div className="mt-0.5">
-              {ev.type === 'control' && <ShieldCheck className="w-4 h-4 text-blue-600" />}
-              {ev.type === 'warning' && <AlertTriangle className="w-4 h-4 text-amber-600" />}
-              {ev.type === 'fault' && <Zap className="w-4 h-4 text-red-600" />}
-              {ev.type === 'info' && <CheckCircle2 className="w-4 h-4 text-emerald-600" />}
+              {ev.category === 'CONTROL' && <ShieldCheck className="w-3.5 h-3.5 text-slate-500 shrink-0" />}
+              {ev.category === 'FAULT' && <Zap className="w-3.5 h-3.5 text-rose-600 shrink-0" />}
+              {ev.category === 'AI' && <Sparkles className="w-3.5 h-3.5 text-slate-500 shrink-0" />}
+              {ev.category === 'PROCESS' && <CheckCircle2 className="w-3.5 h-3.5 text-slate-400 shrink-0" />}
             </div>
-            <div className="flex-1 space-y-0.5">
-              <div className="flex justify-between items-center">
-                <span className="font-bold text-slate-900">{ev.title}</span>
-                <span className="font-mono text-[10px] text-slate-500 font-semibold">t={ev.time.toFixed(1)}h</span>
+            <div className="flex-1 space-y-0.5 min-w-0">
+              <div className="flex justify-between items-center gap-1">
+                <div className="flex items-center gap-1.5 truncate">
+                  <span className="font-semibold text-slate-900 truncate">{ev.title}</span>
+                  <span
+                    className={`text-[9px] font-medium px-1.5 py-0.5 rounded border ${
+                      ev.category === 'FAULT'
+                        ? 'bg-rose-100 text-rose-800 border-rose-200'
+                        : 'bg-white text-slate-500 border-slate-200'
+                    }`}
+                  >
+                    {ev.category}
+                  </span>
+                </div>
+                <span className="font-mono text-[10px] text-slate-400 shrink-0 font-medium">t={ev.time.toFixed(1)}h</span>
               </div>
-              <p className="text-[11px] text-slate-600 font-sans">{ev.desc}</p>
+              <p className="text-[11px] text-slate-500 leading-snug">{ev.desc}</p>
             </div>
           </div>
         ))}

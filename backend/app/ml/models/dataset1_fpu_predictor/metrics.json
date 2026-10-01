@@ -1,0 +1,30 @@
+{
+  "validation": {
+    "linear_regression": {
+      "mae": 1.8573039938733062,
+      "rmse": 2.3248396179306803,
+      "r2": -0.014039861483391647
+    },
+    "random_forest": {
+      "mae": 1.8489239751820037,
+      "rmse": 2.3425003758687652,
+      "r2": -0.029504786117500625
+    },
+    "gradient_boosting": {
+      "mae": 1.9145840151927678,
+      "rmse": 2.425843965157676,
+      "r2": -0.10406529121219643
+    }
+  },
+  "selected_model": "Linear Regression",
+  "test_metrics": {
+    "mae": 1.9302,
+    "rmse": 2.3772,
+    "r2": -0.0044
+  },
+  "cross_validation": {
+    "cv_folds": 5,
+    "cv_r2_mean": -0.0132,
+    "cv_r2_std": 0.0134
+  }
+}

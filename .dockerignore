@@ -1,0 +1,27 @@
+# Git
+.git
+.gitignore
+
+# Dependencies & Environments
+node_modules
+.venv
+venv
+ENV
+env
+__pycache__
+*.pyc
+*.pyo
+
+# Build & Test Caches
+dist
+build
+*.egg-info
+.pytest_cache
+.coverage
+htmlcov
+.cache
+
+# Logs & Temp
+*.log
+.DS_Store
+Thumbs.db

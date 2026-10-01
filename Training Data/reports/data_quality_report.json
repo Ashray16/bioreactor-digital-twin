@@ -1,0 +1,286 @@
+{
+  "dataset_name": "Aggregated_data_with_1000_runs.xlsx",
+  "dataset_id": "dataset_1",
+  "source": "Kaggle Fungal Cellulase Bioreactor Dataset (Trichoderma reesei)",
+  "process_type": "Batch / Fed-batch cellulase enzyme bioprocess",
+  "total_rows": 1000,
+  "total_columns": 12,
+  "duplicate_rows": 0,
+  "unique_batches": 999,
+  "target_primary": {
+    "name": "Max FPU/ml",
+    "canonical": "max_fpu_per_ml",
+    "unit": "FPU/mL",
+    "missing_count": 0,
+    "description": "Filter Paper Units per mL cellulase enzyme activity"
+  },
+  "columns_metadata": [
+    {
+      "column_name": "Run_ID",
+      "canonical_name": "batch_id",
+      "mapping_status": "DIRECT",
+      "unit": "dimensionless",
+      "role": "FEATURE",
+      "data_type": "categorical",
+      "missing_count": 0,
+      "missing_pct": 0.0,
+      "stats": null
+    },
+    {
+      "column_name": "Avg_temp",
+      "canonical_name": "temperature",
+      "mapping_status": "DIRECT",
+      "unit": "\u00b0C",
+      "role": "FEATURE",
+      "data_type": "numeric",
+      "missing_count": 0,
+      "missing_pct": 0.0,
+      "stats": {
+        "count": 1000,
+        "mean": 27.3263,
+        "std": 2.2868,
+        "min": 20.521,
+        "q1": 25.6325,
+        "median": 27.2845,
+        "q3": 28.876,
+        "max": 35.574,
+        "iqr": 3.2435,
+        "outlier_count": 6,
+        "outlier_bounds": [
+          20.7672,
+          33.7413
+        ]
+      }
+    },
+    {
+      "column_name": "Avg_pH",
+      "canonical_name": "pH",
+      "mapping_status": "DIRECT",
+      "unit": "pH units",
+      "role": "FEATURE",
+      "data_type": "numeric",
+      "missing_count": 0,
+      "missing_pct": 0.0,
+      "stats": {
+        "count": 1000,
+        "mean": 5.0676,
+        "std": 0.714,
+        "min": 2.608,
+        "q1": 4.5553,
+        "median": 5.018,
+        "q3": 5.546,
+        "max": 7.363,
+        "iqr": 0.9907,
+        "outlier_count": 3,
+        "outlier_bounds": [
+          3.0691,
+          7.0321
+        ]
+      }
+    },
+    {
+      "column_name": "Min_DO %",
+      "canonical_name": "dissolved_oxygen_min",
+      "mapping_status": "RELATED_BUT_NOT_EQUIVALENT",
+      "unit": "% saturation",
+      "role": "FEATURE",
+      "data_type": "numeric",
+      "missing_count": 0,
+      "missing_pct": 0.0,
+      "stats": {
+        "count": 1000,
+        "mean": 21.3699,
+        "std": 20.6521,
+        "min": -37.291,
+        "q1": 6.6458,
+        "median": 21.5075,
+        "q3": 35.974,
+        "max": 86.008,
+        "iqr": 29.3282,
+        "outlier_count": 2,
+        "outlier_bounds": [
+          -37.3466,
+          79.9664
+        ]
+      }
+    },
+    {
+      "column_name": "Inoculum size (mL)",
+      "canonical_name": "inoculum_volume_ml",
+      "mapping_status": "DIRECT",
+      "unit": "mL",
+      "role": "FEATURE",
+      "data_type": "numeric",
+      "missing_count": 0,
+      "missing_pct": 0.0,
+      "stats": {
+        "count": 1000,
+        "mean": 90.9113,
+        "std": 20.2521,
+        "min": 34.463,
+        "q1": 76.6195,
+        "median": 90.9,
+        "q3": 104.148,
+        "max": 159.697,
+        "iqr": 27.5285,
+        "outlier_count": 10,
+        "outlier_bounds": [
+          35.3268,
+          145.4407
+        ]
+      }
+    },
+    {
+      "column_name": "Max_RPM",
+      "canonical_name": "agitation_rpm_max",
+      "mapping_status": "DIRECT",
+      "unit": "RPM",
+      "role": "FEATURE",
+      "data_type": "numeric",
+      "missing_count": 0,
+      "missing_pct": 0.0,
+      "stats": {
+        "count": 1000,
+        "mean": 252.7859,
+        "std": 22.2325,
+        "min": 173.326,
+        "q1": 238.6122,
+        "median": 252.954,
+        "q3": 267.7485,
+        "max": 307.827,
+        "iqr": 29.1362,
+        "outlier_count": 5,
+        "outlier_bounds": [
+          194.9079,
+          311.4529
+        ]
+      }
+    },
+    {
+      "column_name": "Total feed of Lactose (mL)",
+      "canonical_name": "lactose_feed_volume_ml",
+      "mapping_status": "DIRECT",
+      "unit": "mL",
+      "role": "FEATURE",
+      "data_type": "numeric",
+      "missing_count": 0,
+      "missing_pct": 0.0,
+      "stats": {
+        "count": 1000,
+        "mean": 1138.6344,
+        "std": 528.438,
+        "min": -475.612,
+        "q1": 779.1648,
+        "median": 1141.7085,
+        "q3": 1493.9062,
+        "max": 3126.96,
+        "iqr": 714.7415,
+        "outlier_count": 9,
+        "outlier_bounds": [
+          -292.9475,
+          2566.0185
+        ]
+      }
+    },
+    {
+      "column_name": "Total culture duration (days)",
+      "canonical_name": "culture_duration_days",
+      "mapping_status": "DIRECT",
+      "unit": "days",
+      "role": "FEATURE",
+      "data_type": "numeric",
+      "missing_count": 0,
+      "missing_pct": 0.0,
+      "stats": {
+        "count": 1000,
+        "mean": 5.5198,
+        "std": 0.9068,
+        "min": 2.929,
+        "q1": 4.915,
+        "median": 5.4665,
+        "q3": 6.1122,
+        "max": 8.402,
+        "iqr": 1.1972,
+        "outlier_count": 12,
+        "outlier_bounds": [
+          3.1191,
+          7.9081
+        ]
+      }
+    },
+    {
+      "column_name": "Contamination (Y/N)",
+      "canonical_name": "contamination_flag",
+      "mapping_status": "DIRECT",
+      "unit": "categorical (Y/N)",
+      "role": "FEATURE",
+      "data_type": "categorical",
+      "missing_count": 0,
+      "missing_pct": 0.0,
+      "stats": null
+    },
+    {
+      "column_name": "Total media volume (mL)",
+      "canonical_name": "media_volume_ml",
+      "mapping_status": "DIRECT",
+      "unit": "mL",
+      "role": "FEATURE",
+      "data_type": "numeric",
+      "missing_count": 0,
+      "missing_pct": 0.0,
+      "stats": {
+        "count": 1000,
+        "mean": 4104.3148,
+        "std": 528.119,
+        "min": 2344.445,
+        "q1": 3769.9592,
+        "median": 4115.9345,
+        "q3": 4459.8013,
+        "max": 5796.34,
+        "iqr": 689.842,
+        "outlier_count": 14,
+        "outlier_bounds": [
+          2735.1962,
+          5494.5643
+        ]
+      }
+    },
+    {
+      "column_name": "Max FPU/ml",
+      "canonical_name": "max_fpu_per_ml",
+      "mapping_status": "DIRECT",
+      "unit": "FPU/mL",
+      "role": "PRIMARY_TARGET",
+      "data_type": "numeric",
+      "missing_count": 0,
+      "missing_pct": 0.0,
+      "stats": {
+        "count": 1000,
+        "mean": 2.3055,
+        "std": 2.1962,
+        "min": -4.843,
+        "q1": 0.866,
+        "median": 2.317,
+        "q3": 3.746,
+        "max": 9.076,
+        "iqr": 2.88,
+        "outlier_count": 10,
+        "outlier_bounds": [
+          -3.454,
+          8.066
+        ]
+      }
+    },
+    {
+      "column_name": "Notes",
+      "canonical_name": "yield_category",
+      "mapping_status": "DIRECT",
+      "unit": "categorical",
+      "role": "SECONDARY_TARGET",
+      "data_type": "categorical",
+      "missing_count": 0,
+      "missing_pct": 0.0,
+      "stats": null
+    }
+  ]
+}

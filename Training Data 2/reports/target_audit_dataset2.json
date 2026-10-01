@@ -1,0 +1,38 @@
+{
+  "titer (g/L)": {
+    "valid_count": 1128,
+    "missing_count": 81,
+    "missing_pct": 6.7,
+    "min": 0.0,
+    "max": 733.0,
+    "mean": 25.1806,
+    "median": 2.5971,
+    "std": 71.9596,
+    "cv": 2.8577,
+    "skewness": 5.8412
+  },
+  "rate (g/L/h)": {
+    "valid_count": 782,
+    "missing_count": 427,
+    "missing_pct": 35.32,
+    "min": 0.0,
+    "max": 14.94,
+    "mean": 0.4012,
+    "median": 0.0583,
+    "std": 1.0981,
+    "cv": 2.7368,
+    "skewness": 7.4573
+  },
+  "yield (g/g)": {
+    "valid_count": 769,
+    "missing_count": 440,
+    "missing_pct": 36.39,
+    "min": 0.0,
+    "max": 93.955,
+    "mean": 1.7272,
+    "median": 0.2551,
+    "std": 9.6854,
+    "cv": 5.6074,
+    "skewness": 8.3686
+  }
+}

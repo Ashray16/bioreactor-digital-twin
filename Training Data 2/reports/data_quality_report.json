@@ -1,0 +1,1145 @@
+{
+  "dataset_name": "Oyetunde et al. data.xlsx",
+  "dataset_id": "dataset_2",
+  "source": "Oyetunde et al. (2018) E. coli Metabolic Engineering Literature Dataset",
+  "process_type": "Heterogeneous microbial fermentation literature dataset",
+  "total_rows": 1209,
+  "total_columns": 60,
+  "duplicate_rows": 0,
+  "unique_papers": 107,
+  "target_primary": {
+    "name": "titer",
+    "canonical": "product_titer",
+    "unit": "g/L",
+    "missing_count": 81,
+    "missing_pct": 6.7,
+    "description": "Biochemical product concentration in g/L"
+  },
+  "columns_metadata": [
+    {
+      "column_name": "paper_number",
+      "canonical_name": "paper_id",
+      "mapping_status": "DIRECT",
+      "unit": "dimensionless",
+      "role": "FEATURE",
+      "data_type": "categorical",
+      "missing_count": 0,
+      "missing_pct": 0.0,
+      "stats": null
+    },
+    {
+      "column_name": "gen_info",
+      "canonical_name": "gen_info",
+      "mapping_status": "SOURCE_SPECIFIC",
+      "unit": "varies",
+      "role": "FEATURE",
+      "data_type": "categorical",
+      "missing_count": 6,
+      "missing_pct": 0.5,
+      "stats": null
+    },
+    {
+      "column_name": "env_info",
+      "canonical_name": "env_info",
+      "mapping_status": "SOURCE_SPECIFIC",
+      "unit": "varies",
+      "role": "FEATURE",
+      "data_type": "categorical",
+      "missing_count": 6,
+      "missing_pct": 0.5,
+      "stats": null
+    },
+    {
+      "column_name": "good",
+      "canonical_name": "good",
+      "mapping_status": "SOURCE_SPECIFIC",
+      "unit": "varies",
+      "role": "FEATURE",
+      "data_type": "categorical",
+      "missing_count": 0,
+      "missing_pct": 0.0,
+      "stats": null
+    },
+    {
+      "column_name": "no_of_designs",
+      "canonical_name": "design_id",
+      "mapping_status": "DIRECT",
+      "unit": "dimensionless",
+      "role": "FEATURE",
+      "data_type": "categorical",
+      "missing_count": 0,
+      "missing_pct": 0.0,
+      "stats": null
+    },
+    {
+      "column_name": "cs1",
+      "canonical_name": "cs1",
+      "mapping_status": "SOURCE_SPECIFIC",
+      "unit": "varies",
+      "role": "FEATURE",
+      "data_type": "numeric",
+      "missing_count": 18,
+      "missing_pct": 1.49,
+      "stats": {
+        "count": 1191,
+        "mean": 3.9673,
+        "std": 4.4162,
+        "min": 1.0,
+        "q1": 1.0,
+        "median": 1.0,
+        "q3": 9.0,
+        "max": 21.0,
+        "iqr": 8.0,
+        "outlier_count": 0,
+        "outlier_bounds": [
+          -11.0,
+          21.0
+        ]
+      }
+    },
+    {
+      "column_name": "cs1_mw",
+      "canonical_name": "cs1_mw",
+      "mapping_status": "SOURCE_SPECIFIC",
+      "unit": "varies",
+      "role": "FEATURE",
+      "data_type": "numeric",
+      "missing_count": 104,
+      "missing_pct": 8.6,
+      "stats": {
+        "count": 1105,
+        "mean": 168.0774,
+        "std": 52.606,
+        "min": 87.05,
+        "q1": 180.16,
+        "median": 180.16,
+        "q3": 180.16,
+        "max": 342.3,
+        "iqr": 0.0,
+        "outlier_count": 335,
+        "outlier_bounds": [
+          180.16,
+          180.16
+        ]
+      }
+    },
+    {
+      "column_name": "cs_conc1",
+      "canonical_name": "substrate_concentration",
+      "mapping_status": "DIRECT",
+      "unit": "g/L",
+      "role": "FEATURE",
+      "data_type": "numeric",
+      "missing_count": 34,
+      "missing_pct": 2.81,
+      "stats": {
+        "count": 1175,
+        "mean": 276.8747,
+        "std": 543.6475,
+        "min": 0.0,
+        "q1": 108.5894,
+        "median": 138.7655,
+        "q3": 277.5311,
+        "max": 7806.76,
+        "iqr": 168.9417,
+        "outlier_count": 122,
+        "outlier_bounds": [
+          -144.8231,
+          530.9436
+        ]
+      }
+    },
+    {
+      "column_name": "CS_C1",
+      "canonical_name": "CS_C1",
+      "mapping_status": "SOURCE_SPECIFIC",
+      "unit": "varies",
+      "role": "FEATURE",
+      "data_type": "numeric",
+      "missing_count": 104,
+      "missing_pct": 8.6,
+      "stats": {
+        "count": 1105,
+        "mean": 5.6109,
+        "std": 1.8668,
+        "min": 3.0,
+        "q1": 6.0,
+        "median": 6.0,
+        "q3": 6.0,
+        "max": 12.0,
+        "iqr": 0.0,
+        "outlier_count": 326,
+        "outlier_bounds": [
+          6.0,
+          6.0
+        ]
+      }
+    },
+    {
+      "column_name": "CS_H1",
+      "canonical_name": "CS_H1",
+      "mapping_status": "SOURCE_SPECIFIC",
+      "unit": "varies",
+      "role": "FEATURE",
+      "data_type": "numeric",
+      "missing_count": 104,
+      "missing_pct": 8.6,
+      "stats": {
+        "count": 1105,
+        "mean": 11.5611,
+        "std": 2.852,
+        "min": 3.0,
+        "q1": 12.0,
+        "median": 12.0,
+        "q3": 12.0,
+        "max": 22.0,
+        "iqr": 0.0,
+        "outlier_count": 334,
+        "outlier_bounds": [
+          12.0,
+          12.0
+        ]
+      }
+    },
+    {
+      "column_name": "CS_O1",
+      "canonical_name": "CS_O1",
+      "mapping_status": "SOURCE_SPECIFIC",
+      "unit": "varies",
+      "role": "FEATURE",
+      "data_type": "numeric",
+      "missing_count": 104,
+      "missing_pct": 8.6,
+      "stats": {
+        "count": 1105,
+        "mean": 5.5647,
+        "std": 1.7117,
+        "min": 3.0,
+        "q1": 6.0,
+        "median": 6.0,
+        "q3": 6.0,
+        "max": 11.0,
+        "iqr": 0.0,
+        "outlier_count": 327,
+        "outlier_bounds": [
+          6.0,
+          6.0
+        ]
+      }
+    },
+    {
+      "column_name": "cs2",
+      "canonical_name": "cs2",
+      "mapping_status": "SOURCE_SPECIFIC",
+      "unit": "varies",
+      "role": "FEATURE",
+      "data_type": "numeric",
+      "missing_count": 0,
+      "missing_pct": 0.0,
+      "stats": {
+        "count": 1209,
+        "mean": 0.4599,
+        "std": 2.2588,
+        "min": 0.0,
+        "q1": 0.0,
+        "median": 0.0,
+        "q3": 0.0,
+        "max": 21.0,
+        "iqr": 0.0,
+        "outlier_count": 63,
+        "outlier_bounds": [
+          0.0,
+          0.0
+        ]
+      }
+    },
+    {
+      "column_name": "cs2_mw",
+      "canonical_name": "cs2_mw",
+      "mapping_status": "SOURCE_SPECIFIC",
+      "unit": "varies",
+      "role": "FEATURE",
+      "data_type": "numeric",
+      "missing_count": 16,
+      "missing_pct": 1.32,
+      "stats": {
+        "count": 1193,
+        "mean": 3.9338,
+        "std": 22.4325,
+        "min": 0.0,
+        "q1": 0.0,
+        "median": 0.0,
+        "q3": 0.0,
+        "max": 342.3,
+        "iqr": 0.0,
+        "outlier_count": 47,
+        "outlier_bounds": [
+          0.0,
+          0.0
+        ]
+      }
+    },
+    {
+      "column_name": "cs_conc2",
+      "canonical_name": "cs_conc2",
+      "mapping_status": "SOURCE_SPECIFIC",
+      "unit": "varies",
+      "role": "FEATURE",
+      "data_type": "numeric",
+      "missing_count": 0,
+      "missing_pct": 0.0,
+      "stats": {
+        "count": 1209,
+        "mean": 14.704,
+        "std": 153.0938,
+        "min": 0.0,
+        "q1": 0.0,
+        "median": 0.0,
+        "q3": 0.0,
+        "max": 2251.95,
+        "iqr": 0.0,
+        "outlier_count": 63,
+        "outlier_bounds": [
+          0.0,
+          0.0
+        ]
+      }
+    },
+    {
+      "column_name": "CS_C2",
+      "canonical_name": "CS_C2",
+      "mapping_status": "SOURCE_SPECIFIC",
+      "unit": "varies",
+      "role": "FEATURE",
+      "data_type": "numeric",
+      "missing_count": 16,
+      "missing_pct": 1.32,
+      "stats": {
+        "count": 1193,
+        "mean": 0.1316,
+        "std": 0.7552,
+        "min": 0.0,
+        "q1": 0.0,
+        "median": 0.0,
+        "q3": 0.0,
+        "max": 12.0,
+        "iqr": 0.0,
+        "outlier_count": 47,
+        "outlier_bounds": [
+          0.0,
+          0.0
+        ]
+      }
+    },
+    {
+      "column_name": "CS_H2",
+      "canonical_name": "CS_H2",
+      "mapping_status": "SOURCE_SPECIFIC",
+      "unit": "varies",
+      "role": "FEATURE",
+      "data_type": "numeric",
+      "missing_count": 16,
+      "missing_pct": 1.32,
+      "stats": {
+        "count": 1193,
+        "mean": 0.2355,
+        "std": 1.4251,
+        "min": 0.0,
+        "q1": 0.0,
+        "median": 0.0,
+        "q3": 0.0,
+        "max": 22.0,
+        "iqr": 0.0,
+        "outlier_count": 47,
+        "outlier_bounds": [
+          0.0,
+          0.0
+        ]
+      }
+    },
+    {
+      "column_name": "CS_O2",
+      "canonical_name": "CS_O2",
+      "mapping_status": "SOURCE_SPECIFIC",
+      "unit": "varies",
+      "role": "FEATURE",
+      "data_type": "numeric",
+      "missing_count": 16,
+      "missing_pct": 1.32,
+      "stats": {
+        "count": 1193,
+        "mean": 0.1308,
+        "std": 0.7424,
+        "min": 0.0,
+        "q1": 0.0,
+        "median": 0.0,
+        "q3": 0.0,
+        "max": 11.0,
+        "iqr": 0.0,
+        "outlier_count": 47,
+        "outlier_bounds": [
+          0.0,
+          0.0
+        ]
+      }
+    },
+    {
+      "column_name": "cs3",
+      "canonical_name": "cs3",
+      "mapping_status": "SOURCE_SPECIFIC",
+      "unit": "varies",
+      "role": "FEATURE",
+      "data_type": "numeric",
+      "missing_count": 0,
+      "missing_pct": 0.0,
+      "stats": {
+        "count": 1209,
+        "mean": 0.0066,
+        "std": 0.1676,
+        "min": 0.0,
+        "q1": 0.0,
+        "median": 0.0,
+        "q3": 0.0,
+        "max": 5.0,
+        "iqr": 0.0,
+        "outlier_count": 2,
+        "outlier_bounds": [
+          0.0,
+          0.0
+        ]
+      }
+    },
+    {
+      "column_name": "cs3_mw",
+      "canonical_name": "cs3_mw",
+      "mapping_status": "SOURCE_SPECIFIC",
+      "unit": "varies",
+      "role": "FEATURE",
+      "data_type": "numeric",
+      "missing_count": 0,
+      "missing_pct": 0.0,
+      "stats": {
+        "count": 1209,
+        "mean": 0.221,
+        "std": 5.7503,
+        "min": 0.0,
+        "q1": 0.0,
+        "median": 0.0,
+        "q3": 0.0,
+        "max": 180.16,
+        "iqr": 0.0,
+        "outlier_count": 2,
+        "outlier_bounds": [
+          0.0,
+          0.0
+        ]
+      }
+    },
+    {
+      "column_name": "cs_conc3",
+      "canonical_name": "cs_conc3",
+      "mapping_status": "SOURCE_SPECIFIC",
+      "unit": "varies",
+      "role": "FEATURE",
+      "data_type": "numeric",
+      "missing_count": 0,
+      "missing_pct": 0.0,
+      "stats": {
+        "count": 1209,
+        "mean": 0.051,
+        "std": 1.644,
+        "min": 0.0,
+        "q1": 0.0,
+        "median": 0.0,
+        "q3": 0.0,
+        "max": 57.0,
+        "iqr": 0.0,
+        "outlier_count": 2,
+        "outlier_bounds": [
+          0.0,
+          0.0
+        ]
+      }
+    },
+    {
+      "column_name": "CS_C3",
+      "canonical_name": "CS_C3",
+      "mapping_status": "SOURCE_SPECIFIC",
+      "unit": "varies",
+      "role": "FEATURE",
+      "data_type": "numeric",
+      "missing_count": 93,
+      "missing_pct": 7.69,
+      "stats": {
+        "count": 1116,
+        "mean": 0.0081,
+        "std": 0.2006,
+        "min": 0.0,
+        "q1": 0.0,
+        "median": 0.0,
+        "q3": 0.0,
+        "max": 6.0,
+        "iqr": 0.0,
+        "outlier_count": 2,
+        "outlier_bounds": [
+          0.0,
+          0.0
+        ]
+      }
+    },
+    {
+      "column_name": "CS_H3",
+      "canonical_name": "CS_H3",
+      "mapping_status": "SOURCE_SPECIFIC",
+      "unit": "varies",
+      "role": "FEATURE",
+      "data_type": "numeric",
+      "missing_count": 93,
+      "missing_pct": 7.69,
+      "stats": {
+        "count": 1116,
+        "mean": 0.0134,
+        "std": 0.37,
+        "min": 0.0,
+        "q1": 0.0,
+        "median": 0.0,
+        "q3": 0.0,
+        "max": 12.0,
+        "iqr": 0.0,
+        "outlier_count": 2,
+        "outlier_bounds": [
+          0.0,
+          0.0
+        ]
+      }
+    },
+    {
+      "column_name": "CS_O3",
+      "canonical_name": "CS_O3",
+      "mapping_status": "SOURCE_SPECIFIC",
+      "unit": "varies",
+      "role": "FEATURE",
+      "data_type": "numeric",
+      "missing_count": 93,
+      "missing_pct": 7.69,
+      "stats": {
+        "count": 1116,
+        "mean": 0.0081,
+        "std": 0.2006,
+        "min": 0.0,
+        "q1": 0.0,
+        "median": 0.0,
+        "q3": 0.0,
+        "max": 6.0,
+        "iqr": 0.0,
+        "outlier_count": 2,
+        "outlier_bounds": [
+          0.0,
+          0.0
+        ]
+      }
+    },
+    {
+      "column_name": "reactor_type",
+      "canonical_name": "reactor_type",
+      "mapping_status": "SOURCE_SPECIFIC",
+      "unit": "varies",
+      "role": "FEATURE",
+      "data_type": "numeric",
+      "missing_count": 129,
+      "missing_pct": 10.67,
+      "stats": {
+        "count": 1080,
+        "mean": 1.1611,
+        "std": 0.534,
+        "min": 1.0,
+        "q1": 1.0,
+        "median": 1.0,
+        "q3": 1.0,
+        "max": 3.0,
+        "iqr": 0.0,
+        "outlier_count": 93,
+        "outlier_bounds": [
+          1.0,
+          1.0
+        ]
+      }
+    },
+    {
+      "column_name": "rxt_volume",
+      "canonical_name": "reactor_volume_l",
+      "mapping_status": "DIRECT",
+      "unit": "L",
+      "role": "FEATURE",
+      "data_type": "numeric",
+      "missing_count": 138,
+      "missing_pct": 11.41,
+      "stats": {
+        "count": 1071,
+        "mean": 0.6402,
+        "std": 1.6202,
+        "min": 0.003,
+        "q1": 0.02,
+        "median": 0.08,
+        "q3": 0.35,
+        "max": 13.0,
+        "iqr": 0.33,
+        "outlier_count": 168,
+        "outlier_bounds": [
+          -0.475,
+          0.845
+        ]
+      }
+    },
+    {
+      "column_name": "media",
+      "canonical_name": "media_type",
+      "mapping_status": "DIRECT",
+      "unit": "categorical",
+      "role": "FEATURE",
+      "data_type": "categorical",
+      "missing_count": 7,
+      "missing_pct": 0.58,
+      "stats": null
+    },
+    {
+      "column_name": "temp",
+      "canonical_name": "temperature",
+      "mapping_status": "DIRECT",
+      "unit": "\u00b0C",
+      "role": "FEATURE",
+      "data_type": "numeric",
+      "missing_count": 50,
+      "missing_pct": 4.14,
+      "stats": {
+        "count": 1159,
+        "mean": 34.5902,
+        "std": 3.37,
+        "min": 25.0,
+        "q1": 30.0,
+        "median": 37.0,
+        "q3": 37.0,
+        "max": 42.0,
+        "iqr": 7.0,
+        "outlier_count": 0,
+        "outlier_bounds": [
+          19.5,
+          47.5
+        ]
+      }
+    },
+    {
+      "column_name": "oxygen",
+      "canonical_name": "aerobic_flag",
+      "mapping_status": "RELATED_BUT_NOT_EQUIVALENT",
+      "unit": "indicator (0/1)",
+      "role": "FEATURE",
+      "data_type": "numeric",
+      "missing_count": 112,
+      "missing_pct": 9.26,
+      "stats": {
+        "count": 1097,
+        "mean": 1.8605,
+        "std": 0.7467,
+        "min": 1.0,
+        "q1": 1.0,
+        "median": 2.0,
+        "q3": 2.0,
+        "max": 3.0,
+        "iqr": 1.0,
+        "outlier_count": 0,
+        "outlier_bounds": [
+          -0.5,
+          3.5
+        ]
+      }
+    },
+    {
+      "column_name": "strain_background",
+      "canonical_name": "strain_background",
+      "mapping_status": "SOURCE_SPECIFIC",
+      "unit": "varies",
+      "role": "FEATURE",
+      "data_type": "categorical",
+      "missing_count": 79,
+      "missing_pct": 6.53,
+      "stats": null
+    },
+    {
+      "column_name": "strain_background_genotype",
+      "canonical_name": "strain_background_genotype",
+      "mapping_status": "SOURCE_SPECIFIC",
+      "unit": "varies",
+      "role": "FEATURE",
+      "data_type": "categorical",
+      "missing_count": 121,
+      "missing_pct": 10.01,
+      "stats": null
+    },
+    {
+      "column_name": "strain_background_genotype_modification",
+      "canonical_name": "strain_background_genotype_modification",
+      "mapping_status": "SOURCE_SPECIFIC",
+      "unit": "varies",
+      "role": "FEATURE",
+      "data_type": "categorical",
+      "missing_count": 121,
+      "missing_pct": 10.01,
+      "stats": null
+    },
+    {
+      "column_name": "genes_modified",
+      "canonical_name": "genes_modified",
+      "mapping_status": "SOURCE_SPECIFIC",
+      "unit": "varies",
+      "role": "FEATURE",
+      "data_type": "categorical",
+      "missing_count": 473,
+      "missing_pct": 39.12,
+      "stats": null
+    },
+    {
+      "column_name": "gene_deletion",
+      "canonical_name": "gene_deletion",
+      "mapping_status": "SOURCE_SPECIFIC",
+      "unit": "varies",
+      "role": "FEATURE",
+      "data_type": "categorical",
+      "missing_count": 494,
+      "missing_pct": 40.86,
+      "stats": null
+    },
+    {
+      "column_name": "gene_overexpression",
+      "canonical_name": "gene_overexpression",
+      "mapping_status": "SOURCE_SPECIFIC",
+      "unit": "varies",
+      "role": "FEATURE",
+      "data_type": "categorical",
+      "missing_count": 494,
+      "missing_pct": 40.86,
+      "stats": null
+    },
+    {
+      "column_name": "heterologous_gene",
+      "canonical_name": "heterologous_gene",
+      "mapping_status": "SOURCE_SPECIFIC",
+      "unit": "varies",
+      "role": "FEATURE",
+      "data_type": "categorical",
+      "missing_count": 473,
+      "missing_pct": 39.12,
+      "stats": null
+    },
+    {
+      "column_name": "replication_origin",
+      "canonical_name": "replication_origin",
+      "mapping_status": "SOURCE_SPECIFIC",
+      "unit": "varies",
+      "role": "FEATURE",
+      "data_type": "categorical",
+      "missing_count": 507,
+      "missing_pct": 41.94,
+      "stats": null
+    },
+    {
+      "column_name": "codon_optimization",
+      "canonical_name": "codon_optimization",
+      "mapping_status": "SOURCE_SPECIFIC",
+      "unit": "varies",
+      "role": "FEATURE",
+      "data_type": "categorical",
+      "missing_count": 478,
+      "missing_pct": 39.54,
+      "stats": null
+    },
+    {
+      "column_name": "sensor_regulator",
+      "canonical_name": "sensor_regulator",
+      "mapping_status": "SOURCE_SPECIFIC",
+      "unit": "varies",
+      "role": "FEATURE",
+      "data_type": "categorical",
+      "missing_count": 478,
+      "missing_pct": 39.54,
+      "stats": null
+    },
+    {
+      "column_name": "enzyme_redesign_evolution",
+      "canonical_name": "enzyme_redesign_evolution",
+      "mapping_status": "SOURCE_SPECIFIC",
+      "unit": "varies",
+      "role": "FEATURE",
+      "data_type": "categorical",
+      "missing_count": 478,
+      "missing_pct": 39.54,
+      "stats": null
+    },
+    {
+      "column_name": "protein_scaffold",
+      "canonical_name": "protein_scaffold",
+      "mapping_status": "SOURCE_SPECIFIC",
+      "unit": "varies",
+      "role": "FEATURE",
+      "data_type": "categorical",
+      "missing_count": 478,
+      "missing_pct": 39.54,
+      "stats": null
+    },
+    {
+      "column_name": "dir_evo",
+      "canonical_name": "dir_evo",
+      "mapping_status": "SOURCE_SPECIFIC",
+      "unit": "varies",
+      "role": "FEATURE",
+      "data_type": "categorical",
+      "missing_count": 397,
+      "missing_pct": 32.84,
+      "stats": null
+    },
+    {
+      "column_name": "Mod_path_opt",
+      "canonical_name": "Mod_path_opt",
+      "mapping_status": "SOURCE_SPECIFIC",
+      "unit": "varies",
+      "role": "FEATURE",
+      "data_type": "categorical",
+      "missing_count": 478,
+      "missing_pct": 39.54,
+      "stats": null
+    },
+    {
+      "column_name": "product_name",
+      "canonical_name": "product_name",
+      "mapping_status": "DIRECT",
+      "unit": "categorical",
+      "role": "FEATURE",
+      "data_type": "categorical",
+      "missing_count": 0,
+      "missing_pct": 0.0,
+      "stats": null
+    },
+    {
+      "column_name": "no_C",
+      "canonical_name": "no_C",
+      "mapping_status": "SOURCE_SPECIFIC",
+      "unit": "varies",
+      "role": "FEATURE",
+      "data_type": "numeric",
+      "missing_count": 4,
+      "missing_pct": 0.33,
+      "stats": {
+        "count": 1205,
+        "mean": 6.9992,
+        "std": 7.2888,
+        "min": 0.0,
+        "q1": 3.0,
+        "median": 4.0,
+        "q3": 9.0,
+        "max": 40.0,
+        "iqr": 6.0,
+        "outlier_count": 41,
+        "outlier_bounds": [
+          -6.0,
+          18.0
+        ]
+      }
+    },
+    {
+      "column_name": "no_H",
+      "canonical_name": "no_H",
+      "mapping_status": "SOURCE_SPECIFIC",
+      "unit": "varies",
+      "role": "FEATURE",
+      "data_type": "numeric",
+      "missing_count": 4,
+      "missing_pct": 0.33,
+      "stats": {
+        "count": 1205,
+        "mean": 12.9801,
+        "std": 11.6351,
+        "min": 2.0,
+        "q1": 6.0,
+        "median": 6.0,
+        "q3": 12.0,
+        "max": 56.0,
+        "iqr": 6.0,
+        "outlier_count": 287,
+        "outlier_bounds": [
+          -3.0,
+          21.0
+        ]
+      }
+    },
+    {
+      "column_name": "no_O",
+      "canonical_name": "no_O",
+      "mapping_status": "SOURCE_SPECIFIC",
+      "unit": "varies",
+      "role": "FEATURE",
+      "data_type": "numeric",
+      "missing_count": 4,
+      "missing_pct": 0.33,
+      "stats": {
+        "count": 1205,
+        "mean": 2.4589,
+        "std": 1.3199,
+        "min": 0.0,
+        "q1": 1.0,
+        "median": 2.0,
+        "q3": 4.0,
+        "max": 5.0,
+        "iqr": 3.0,
+        "outlier_count": 0,
+        "outlier_bounds": [
+          -3.5,
+          8.5
+        ]
+      }
+    },
+    {
+      "column_name": "no_N",
+      "canonical_name": "no_N",
+      "mapping_status": "SOURCE_SPECIFIC",
+      "unit": "varies",
+      "role": "FEATURE",
+      "data_type": "numeric",
+      "missing_count": 4,
+      "missing_pct": 0.33,
+      "stats": {
+        "count": 1205,
+        "mean": 0.0647,
+        "std": 0.4243,
+        "min": 0.0,
+        "q1": 0.0,
+        "median": 0.0,
+        "q3": 0.0,
+        "max": 4.0,
+        "iqr": 0.0,
+        "outlier_count": 42,
+        "outlier_bounds": [
+          0.0,
+          0.0
+        ]
+      }
+    },
+    {
+      "column_name": "mw",
+      "canonical_name": "mw",
+      "mapping_status": "SOURCE_SPECIFIC",
+      "unit": "varies",
+      "role": "FEATURE",
+      "data_type": "numeric",
+      "missing_count": 30,
+      "missing_pct": 2.48,
+      "stats": {
+        "count": 1179,
+        "mean": 135.8847,
+        "std": 99.6369,
+        "min": 2.0,
+        "q1": 75.04,
+        "median": 118.0,
+        "q3": 152.0,
+        "max": 641.61,
+        "iqr": 76.96,
+        "outlier_count": 47,
+        "outlier_bounds": [
+          -40.4,
+          267.44
+        ]
+      }
+    },
+    {
+      "column_name": "precursor",
+      "canonical_name": "precursor",
+      "mapping_status": "SOURCE_SPECIFIC",
+      "unit": "varies",
+      "role": "FEATURE",
+      "data_type": "categorical",
+      "missing_count": 555,
+      "missing_pct": 45.91,
+      "stats": null
+    },
+    {
+      "column_name": "enzyme_steps",
+      "canonical_name": "enzyme_steps",
+      "mapping_status": "SOURCE_SPECIFIC",
+      "unit": "varies",
+      "role": "FEATURE",
+      "data_type": "categorical",
+      "missing_count": 680,
+      "missing_pct": 56.24,
+      "stats": null
+    },
+    {
+      "column_name": "atp_cost",
+      "canonical_name": "atp_cost",
+      "mapping_status": "SOURCE_SPECIFIC",
+      "unit": "varies",
+      "role": "FEATURE",
+      "data_type": "categorical",
+      "missing_count": 836,
+      "missing_pct": 69.15,
+      "stats": null
+    },
+    {
+      "column_name": "nadh_nadph_cost",
+      "canonical_name": "nadh_nadph_cost",
+      "mapping_status": "SOURCE_SPECIFIC",
+      "unit": "varies",
+      "role": "FEATURE",
+      "data_type": "categorical",
+      "missing_count": 819,
+      "missing_pct": 67.74,
+      "stats": null
+    },
+    {
+      "column_name": "yield",
+      "canonical_name": "product_yield",
+      "mapping_status": "DIRECT",
+      "unit": "g/g",
+      "role": "SECONDARY_TARGET",
+      "data_type": "numeric",
+      "missing_count": 440,
+      "missing_pct": 36.39,
+      "stats": {
+        "count": 769,
+        "mean": 1.7272,
+        "std": 9.6854,
+        "min": 0.0,
+        "q1": 0.0576,
+        "median": 0.2551,
+        "q3": 0.6826,
+        "max": 93.955,
+        "iqr": 0.625,
+        "outlier_count": 41,
+        "outlier_bounds": [
+          -0.8799,
+          1.6201
+        ]
+      }
+    },
+    {
+      "column_name": "yield_o",
+      "canonical_name": "yield_o",
+      "mapping_status": "SOURCE_SPECIFIC",
+      "unit": "varies",
+      "role": "FEATURE",
+      "data_type": "categorical",
+      "missing_count": 1132,
+      "missing_pct": 93.63,
+      "stats": null
+    },
+    {
+      "column_name": "yield2",
+      "canonical_name": "yield2",
+      "mapping_status": "SOURCE_SPECIFIC",
+      "unit": "varies",
+      "role": "FEATURE",
+      "data_type": "categorical",
+      "missing_count": 1032,
+      "missing_pct": 85.36,
+      "stats": null
+    },
+    {
+      "column_name": "titer",
+      "canonical_name": "product_titer",
+      "mapping_status": "DIRECT",
+      "unit": "g/L",
+      "role": "PRIMARY_TARGET",
+      "data_type": "numeric",
+      "missing_count": 81,
+      "missing_pct": 6.7,
+      "stats": {
+        "count": 1128,
+        "mean": 25.1806,
+        "std": 71.9596,
+        "min": 0.0,
+        "q1": 0.4976,
+        "median": 2.5971,
+        "q3": 14.8028,
+        "max": 733.0,
+        "iqr": 14.3052,
+        "outlier_count": 200,
+        "outlier_bounds": [
+          -20.9601,
+          36.2606
+        ]
+      }
+    },
+    {
+      "column_name": "rate",
+      "canonical_name": "volumetric_rate",
+      "mapping_status": "DIRECT",
+      "unit": "g/L/h",
+      "role": "SECONDARY_TARGET",
+      "data_type": "numeric",
+      "missing_count": 427,
+      "missing_pct": 35.32,
+      "stats": {
+        "count": 782,
+        "mean": 0.4012,
+        "std": 1.0981,
+        "min": 0.0,
+        "q1": 0.0154,
+        "median": 0.0583,
+        "q3": 0.3679,
+        "max": 14.94,
+        "iqr": 0.3525,
+        "outlier_count": 83,
+        "outlier_bounds": [
+          -0.5133,
+          0.8966
+        ]
+      }
+    },
+    {
+      "column_name": "fermentation_time",
+      "canonical_name": "fermentation_duration_hours",
+      "mapping_status": "DIRECT",
+      "unit": "hours",
+      "role": "FEATURE",
+      "data_type": "numeric",
+      "missing_count": 234,
+      "missing_pct": 19.35,
+      "stats": {
+        "count": 975,
+        "mean": 68.6559,
+        "std": 158.288,
+        "min": 2.0,
+        "q1": 24.0,
+        "median": 40.0,
+        "q3": 72.0,
+        "max": 1440.0,
+        "iqr": 48.0,
+        "outlier_count": 33,
+        "outlier_bounds": [
+          -48.0,
+          144.0
+        ]
+      }
+    },
+    {
+      "column_name": "bio_titre",
+      "canonical_name": "bio_titre",
+      "mapping_status": "SOURCE_SPECIFIC",
+      "unit": "varies",
+      "role": "FEATURE",
+      "data_type": "categorical",
+      "missing_count": 927,
+      "missing_pct": 76.67,
+      "stats": null
+    },
+    {
+      "column_name": "bio_growth_rate",
+      "canonical_name": "specific_growth_rate",
+      "mapping_status": "DIRECT",
+      "unit": "h\u207b\u00b9",
+      "role": "SECONDARY_TARGET",
+      "data_type": "categorical",
+      "missing_count": 1058,
+      "missing_pct": 87.51,
+      "stats": null
+    }
+  ]
+}

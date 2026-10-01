@@ -4,26 +4,32 @@
 
 @layer base {
   body {
-    background-color: #F7F8FA;
+    background-color: #F8FAFC;
     color: #0F172A;
-    font-family: ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  /* Ensure monospace numbers and readouts always use tabular figures */
+  .font-mono {
+    font-variant-numeric: tabular-nums;
   }
 }
 
-/* Industrial Clean Panel Utilities */
+/* Industrial Instrument Flat Panel Utilities */
 .glass-panel {
   background-color: #FFFFFF;
   border: 1px solid #E2E8F0;
-  box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.04), 0 1px 2px 0 rgba(0, 0, 0, 0.02);
+  border-radius: 6px;
+  box-shadow: none;
 }
 
 .glass-panel-hover {
-  transition: all 0.2s ease-in-out;
+  transition: border-color 0.15s ease;
 }
 
 .glass-panel-hover:hover {
   border-color: #CBD5E1;
-  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.06), 0 2px 4px -1px rgba(0, 0, 0, 0.03);
 }
 
 /* Custom Scrollbar for Dense Tables */
@@ -43,4 +49,134 @@
 
 ::-webkit-scrollbar-thumb:hover {
   background: #94A3B8;
+}
+
+/* Bioreactor Animation Keyframes and Classes */
+@keyframes spin-impeller {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}
+.animate-spin-slow {
+  animation: spin-impeller 1.5s linear infinite;
+  transform-origin: center center;
+}
+
+@keyframes spin-vortex-cw {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}
+.animate-vortex-cw {
+  animation: spin-vortex-cw 6s linear infinite;
+  transform-origin: center center;
+}
+
+@keyframes spin-vortex-ccw {
+  from { transform: rotate(360deg); }
+  to { transform: rotate(0deg); }
+}
+.animate-vortex-ccw {
+  animation: spin-vortex-ccw 9s linear infinite;
+  transform-origin: center center;
+}
+
+@keyframes liquid-drift {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-2px); }
+}
+.animate-liquid-drift {
+  animation: liquid-drift 2.5s ease-in-out infinite;
+}
+
+@keyframes flow-move {
+  from { offset-distance: 0%; }
+  to { offset-distance: 100%; }
+}
+.animate-flow-dot {
+  animation: flow-move 3s linear infinite;
+}
+
+@keyframes flow-forward {
+  0% { stroke-dashoffset: 36px; }
+  100% { stroke-dashoffset: 0px; }
+}
+@keyframes flow-backward {
+  0% { stroke-dashoffset: 0px; }
+  100% { stroke-dashoffset: 36px; }
+}
+.animate-pipe-flow {
+  animation: flow-forward 1.2s linear infinite;
+}
+.animate-pipe-flow-reverse {
+  animation: flow-backward 1.2s linear infinite;
+}
+
+@keyframes fluid-pulse {
+  0%, 100% { transform: scale(0.85); opacity: 0.9; }
+  50% { transform: scale(1.25); opacity: 0.4; }
+}
+.animate-fluid-pulse {
+  animation: fluid-pulse 2s ease-in-out infinite;
+  transform-origin: center center;
+}
+
+/* Reduced motion preference */
+@media (prefers-reduced-motion: reduce) {
+  .animate-spin-slow,
+  .animate-vortex-cw,
+  .animate-vortex-ccw,
+  .animate-liquid-drift,
+  .animate-flow-dot,
+  .animate-fiber-flow,
+  .animate-pipe-flow,
+  .animate-pipe-flow-reverse,
+  .animate-fluid-pulse,
+  .animate-pump-stream-1,
+  .animate-pump-stream-2,
+  .animate-pump-stream-3,
+  .animate-feed-wave {
+    animation: none !important;
+    transform: none !important;
+  }
+}
+
+/* Feed Tank Pumping Animations */
+@keyframes pump-out-stream-1 {
+  0% { transform: translate(0, 0); opacity: 0; }
+  15% { opacity: 0.7; }
+  85% { opacity: 0.7; }
+  100% { transform: translate(65px, 40px); opacity: 0; }
+}
+.animate-pump-stream-1 {
+  animation: pump-out-stream-1 3s infinite linear;
+}
+
+@keyframes pump-out-stream-2 {
+  0% { transform: translate(0, 0); opacity: 0; }
+  15% { opacity: 0.7; }
+  85% { opacity: 0.7; }
+  100% { transform: translate(45px, 30px); opacity: 0; }
+}
+.animate-pump-stream-2 {
+  animation: pump-out-stream-2 3s infinite linear;
+  animation-delay: 1.0s;
+}
+
+@keyframes pump-out-stream-3 {
+  0% { transform: translate(0, 0); opacity: 0; }
+  15% { opacity: 0.7; }
+  85% { opacity: 0.7; }
+  100% { transform: translate(75px, 20px); opacity: 0; }
+}
+.animate-pump-stream-3 {
+  animation: pump-out-stream-3 3s infinite linear;
+  animation-delay: 2.0s;
+}
+
+@keyframes feed-surface-wave {
+  0%, 100% { transform: translateY(0) scaleY(1); }
+  50% { transform: translateY(1.5px) scaleY(0.98); }
+}
+.animate-feed-wave {
+  animation: feed-surface-wave 4s ease-in-out infinite;
+  transform-origin: bottom center;
 }

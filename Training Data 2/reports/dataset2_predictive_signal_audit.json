@@ -1,0 +1,54 @@
+{
+  "dataset_name": "Oyetunde et al. data.xlsx",
+  "total_rows": 1209,
+  "titer_valid_count": 1128,
+  "rate_valid_count": 782,
+  "yield_valid_count": 769,
+  "unique_papers": 101,
+  "paper_aware_split": {
+    "train_papers": 70,
+    "train_rows": 816,
+    "val_papers": 15,
+    "val_rows": 102,
+    "test_papers": 16,
+    "test_rows": 210
+  },
+  "model_comparison": {
+    "mean_baseline": {
+      "mae": 30.7749,
+      "rmse": 34.3311,
+      "r2": -0.0021
+    },
+    "lr_process_only": {
+      "mae": 38.3544,
+      "rmse": 56.8096,
+      "r2": -1.744
+    },
+    "rf_process_only": {
+      "mae": 45.037,
+      "rmse": 73.164,
+      "r2": -3.5513
+    },
+    "lr_process_context": {
+      "mae": 64.2377,
+      "rmse": 112.8855,
+      "r2": -9.8348
+    },
+    "rf_process_context": {
+      "mae": 34.8722,
+      "rmse": 66.3876,
+      "r2": -2.7473
+    }
+  },
+  "test_set_evaluation": {
+    "model": "Random Forest Regressor (Process-Only)",
+    "mae": 9.8527,
+    "rmse": 18.6667,
+    "r2": 0.0974
+  },
+  "naive_vs_paper_aware_r2": {
+    "naive_random_split_r2": 0.3868,
+    "paper_aware_split_r2": -3.5513,
+    "leakage_penalty": 3.9381
+  }
+}

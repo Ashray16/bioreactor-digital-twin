@@ -1,0 +1,77 @@
+{
+  "n": 1000,
+  "min": -4.843,
+  "max": 9.076,
+  "mean": 2.3054520000000003,
+  "median": 2.317,
+  "std": 2.1961961491852224,
+  "cv": 0.9526097915659151,
+  "q1": 0.866,
+  "q3": 3.746,
+  "iqr": 2.88,
+  "skewness": -0.02947480739070655,
+  "kurtosis": 0.006119033020592468,
+  "unique_values": 930,
+  "repeated_values": 70,
+  "zeros": 0,
+  "negatives": 144,
+  "outliers": 10,
+  "feature_relationships": [
+    {
+      "feature": "temperature",
+      "original_column": "Avg_temp",
+      "pearson_r": -0.0308,
+      "spearman_rho": -0.032,
+      "mutual_info": 0.0
+    },
+    {
+      "feature": "pH",
+      "original_column": "Avg_pH",
+      "pearson_r": -0.0267,
+      "spearman_rho": -0.022,
+      "mutual_info": 0.0225
+    },
+    {
+      "feature": "dissolved_oxygen_min",
+      "original_column": "Min_DO %",
+      "pearson_r": 0.0051,
+      "spearman_rho": 0.0197,
+      "mutual_info": 0.0296
+    },
+    {
+      "feature": "inoculum_volume_ml",
+      "original_column": "Inoculum size (mL)",
+      "pearson_r": 0.003,
+      "spearman_rho": 0.011,
+      "mutual_info": 0.0
+    },
+    {
+      "feature": "agitation_rpm",
+      "original_column": "Max_RPM",
+      "pearson_r": -0.0443,
+      "spearman_rho": -0.059,
+      "mutual_info": 0.0074
+    },
+    {
+      "feature": "lactose_feed_volume_ml",
+      "original_column": "Total feed of Lactose (mL)",
+      "pearson_r": 0.0696,
+      "spearman_rho": 0.0652,
+      "mutual_info": 0.0162
+    },
+    {
+      "feature": "culture_duration_days",
+      "original_column": "Total culture duration (days)",
+      "pearson_r": 0.0161,
+      "spearman_rho": 0.0113,
+      "mutual_info": 0.0
+    },
+    {
+      "feature": "media_volume_ml",
+      "original_column": "Total media volume (mL)",
+      "pearson_r": 0.0062,
+      "spearman_rho": -0.0053,
+      "mutual_info": 0.0
+    }
+  ]
+}

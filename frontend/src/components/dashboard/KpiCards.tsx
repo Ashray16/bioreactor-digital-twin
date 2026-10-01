@@ -1,207 +1,287 @@
-import { BioreactorState } from '../../types/simulation';
-import { Target, Heart, Droplet, Flame, RefreshCw, AlertTriangle, CheckCircle2 } from 'lucide-react';
+import { useMemo } from 'react';
+import { BioreactorState, SimulationHistoryItem } from '../../types/simulation';
 
 interface KpiCardsProps {
-  state: BioreactorState;
+  state: BioreactorState | null;
+  history?: SimulationHistoryItem[];
 }
 
-export default function KpiCards({ state }: KpiCardsProps) {
+function Sparkline({ data, stroke = '#64748B' }: { data: number[]; stroke?: string }) {
+  if (!data || data.length < 2) {
+    return <div className="h-4 w-12 bg-slate-50 rounded" />;
+  }
+  const min = Math.min(...data);
+  const max = Math.max(...data);
+  const range = max - min || 1;
+  const width = 52;
+  const height = 16;
+  const points = data
+    .map((val, idx) => {
+      const x = (idx / (data.length - 1)) * width;
+      const y = height - ((val - min) / range) * (height - 4) - 2;
+      return `${x.toFixed(1)},${y.toFixed(1)}`;
+    })
+    .join(' ');
+
+  return (
+    <svg width={width} height={height} className="overflow-visible shrink-0 opacity-75">
+      <polyline
+        fill="none"
+        stroke={stroke}
+        strokeWidth="1.25"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+        points={points}
+      />
+    </svg>
+  );
+}
+
+export default function KpiCards({ state, history = [] }: KpiCardsProps) {
+  // Sparkline data extraction from history (last 30 samples)
+  const sparklines = useMemo(() => {
+    const samples = history.slice(-30);
+    return {
+      vcd: samples.map((h) => h.viable_cell_density / 1e6),
+      viability: samples.map((h) => h.cell_viability),
+      glucose: samples.map((h) => h.nutrient_concentration),
+      lactate: samples.map((h) => h.metabolite_concentration),
+      titer: samples.map((h) => h.product_concentration),
+      perfusion: samples.map((h) => h.perfusion_rate),
+      fouling: samples.map((h) => h.fouling_index),
+    };
+  }, [history]);
+
+  if (!state) return null;
+
   const isHighDensity = state.viable_cell_density >= 1e7;
   const cellDensityFormatted = isHighDensity
     ? (state.viable_cell_density / 1e7).toFixed(2)
     : (state.viable_cell_density / 1e6).toFixed(2);
   const cellDensityExponent = isHighDensity ? '10⁷' : '10⁶';
 
-  const targetPercent = Math.min(100, Math.round((state.viable_cell_density / state.target_cell_density) * 100));
+  const flowRateLh = ((state.perfusion_rate / 24.0) * state.reactor_volume).toFixed(3);
 
-  const getFoulingBadgeClass = (status: string) => {
-    switch (status) {
-      case 'LOW':
-        return 'bg-emerald-50 text-emerald-700 border-emerald-200';
-      case 'MODERATE':
-        return 'bg-amber-50 text-amber-700 border-amber-200';
-      case 'HIGH':
-        return 'bg-orange-50 text-orange-700 border-orange-200';
-      case 'CRITICAL':
-        return 'bg-red-50 text-red-700 border-red-200 animate-pulse';
-      default:
-        return 'bg-slate-100 text-slate-600 border-slate-200';
-    }
-  };
+  // Trajectory-aware status logic: culture in growth phase (t < 80h) is on normal trajectory
+  const isVcdAlarm = state.simulation_time >= 90 && state.viable_cell_density < 5e7;
+  const isViabilityAlarm = state.cell_viability < 90;
+  const isGlucoseAlarm = state.nutrient_concentration < 1.5;
+  const isLactateAlarm = state.metabolite_concentration > 3.5;
+  const isFoulingAlarm = state.fouling_index >= 70;
 
   return (
-    <div className="space-y-4">
-      {/* Digital Twin Status Bar */}
-      <div className="glass-panel px-4 py-2.5 rounded-xl border border-slate-200 flex items-center justify-between text-xs text-slate-600 bg-white">
-        <div className="flex items-center gap-3">
-          <span className="flex items-center gap-1.5 font-bold text-emerald-600">
-            <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
-            Digital Twin Synchronized
-          </span>
-          <span className="text-slate-300">|</span>
-          <span>Model Status: <strong className="text-slate-800 font-semibold">Valid Monod-Contois ODEs</strong></span>
-        </div>
-        <div className="flex items-center gap-3 font-mono text-[11px]">
-          <span>Controller: <strong className={state.controller_enabled ? "text-blue-700 font-bold" : "text-amber-700 font-bold"}>{state.controller_enabled ? "Active (Feedback Loop)" : "Inactive (Fixed Perfusion)"}</strong></span>
-          <span className="text-slate-300">|</span>
-          <span>Perfusion: <strong className="text-blue-600 font-bold">{state.perfusion_rate.toFixed(2)} VVD</strong></span>
-        </div>
-      </div>
-
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-6 gap-4">
+    <div className="border border-slate-200 rounded-md bg-white overflow-hidden shadow-none font-sans">
+      <div className="grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-7 divide-y sm:divide-y-0 sm:divide-x divide-slate-200">
+        
         {/* 1. Viable Cell Density */}
-        <div className="glass-panel p-4 rounded-xl flex flex-col justify-between border-slate-200">
-          <div className="flex items-center justify-between mb-2">
-            <span className="text-xs font-bold text-slate-700 flex items-center gap-1.5">
-              <Target className="w-3.5 h-3.5 text-blue-600" />
-              Viable Cell Density
+        <div className="p-3.5 flex flex-col justify-between">
+          <div className="flex items-center justify-between gap-1 mb-1">
+            <span className="text-[11px] font-semibold text-slate-500 uppercase tracking-wide">
+              Cell Density
             </span>
-            {state.target_achieved ? (
-              <span className="flex items-center gap-1 px-1.5 py-0.5 rounded text-[10px] font-bold bg-emerald-50 text-emerald-700 border border-emerald-200">
-                <CheckCircle2 className="w-3 h-3" /> Target Met
+            {isVcdAlarm ? (
+              <span className="inline-flex items-center gap-1 text-[11px] font-semibold text-amber-700">
+                <span className="w-1.5 h-1.5 rounded-full bg-amber-500 shrink-0" />
+                Slow
               </span>
-            ) : (
-              <span className="text-[10px] font-bold text-blue-700 bg-blue-50 px-1.5 py-0.5 rounded border border-blue-100">{targetPercent}% Target</span>
-            )}
+            ) : state.target_achieved ? (
+              <span className="text-[11px] font-medium text-emerald-700">Met</span>
+            ) : null}
           </div>
-          <div>
-            <div className="text-2xl font-bold text-slate-900 tracking-tight">
-              {cellDensityFormatted} <span className="text-xs font-semibold text-blue-600">×{cellDensityExponent}</span>
+
+          <div className="my-1">
+            <div className="flex items-baseline gap-1 font-mono tabular-nums">
+              <span className="text-xl sm:text-2xl font-bold text-slate-900 tracking-tight">
+                {cellDensityFormatted}
+              </span>
+              <span className="text-xs font-semibold text-slate-600 font-mono">
+                ×{cellDensityExponent}
+              </span>
             </div>
-            <p className="text-[11px] font-mono text-slate-500 mt-0.5">cells/mL</p>
+            <span className="text-[10px] text-slate-400 font-mono">cells/mL</span>
           </div>
-          <div className="mt-3 pt-2 border-t border-slate-100 flex items-center justify-between text-[11px] text-slate-500">
-            <span>Target: 1.00 × 10⁸</span>
-            {state.time_to_target && (
-              <span className="text-emerald-600 font-mono font-bold">t={state.time_to_target.toFixed(1)}h</span>
-            )}
+
+          <div className="flex items-center justify-between pt-2 border-t border-slate-100 mt-2">
+            <span className="text-[11px] text-slate-500 truncate">
+              {state.target_achieved
+                ? `Met at t=${state.time_to_target?.toFixed(1) || '0'}h`
+                : 'Target: 100M'}
+            </span>
+            <Sparkline data={sparklines.vcd} stroke="#2563EB" />
           </div>
         </div>
 
         {/* 2. Cell Viability */}
-        <div className="glass-panel p-4 rounded-xl flex flex-col justify-between border-slate-200">
-          <div className="flex items-center justify-between mb-2">
-            <span className="text-xs font-bold text-slate-700 flex items-center gap-1.5">
-              <Heart className="w-3.5 h-3.5 text-emerald-600" />
-              Cell Viability
+        <div className="p-3.5 flex flex-col justify-between">
+          <div className="flex items-center justify-between gap-1 mb-1">
+            <span className="text-[11px] font-semibold text-slate-500 uppercase tracking-wide">
+              Viability
             </span>
-            <span className={`text-[10px] font-bold px-1.5 py-0.5 rounded border ${
-              state.cell_viability >= 90 ? 'text-emerald-700 bg-emerald-50 border-emerald-200' : 'text-amber-700 bg-amber-50 border-amber-200'
-            }`}>
-              {state.cell_viability >= 90 ? 'Healthy' : 'Stressed'}
-            </span>
+            {isViabilityAlarm && (
+              <span className="inline-flex items-center gap-1 text-[11px] font-semibold text-amber-700">
+                <span className="w-1.5 h-1.5 rounded-full bg-amber-500 shrink-0" />
+                Low
+              </span>
+            )}
           </div>
-          <div>
-            <div className="text-2xl font-bold text-slate-900 tracking-tight">
-              {state.cell_viability.toFixed(1)} <span className="text-sm font-normal text-slate-500">%</span>
+
+          <div className="my-1">
+            <div className="flex items-baseline gap-1 font-mono tabular-nums">
+              <span className="text-xl sm:text-2xl font-bold text-slate-900 tracking-tight">
+                {state.cell_viability.toFixed(1)}
+              </span>
+              <span className="text-xs font-semibold text-slate-600 font-mono">%</span>
             </div>
-            <p className="text-[11px] text-slate-500 mt-0.5">Viable fraction</p>
+            <span className="text-[10px] text-slate-400 font-mono">live ratio</span>
           </div>
-          <div className="mt-3 pt-2 border-t border-slate-100 flex items-center justify-between text-[11px] text-slate-500">
-            <span>Dead cells:</span>
-            <span className="font-mono text-slate-700">{(state.nonviable_cell_density / 1e6).toFixed(2)}M</span>
+
+          <div className="flex items-center justify-between pt-2 border-t border-slate-100 mt-2">
+            <span className="text-[11px] text-slate-500 truncate">Threshold ≥ 90%</span>
+            <Sparkline data={sparklines.viability} stroke={isViabilityAlarm ? '#D97706' : '#64748B'} />
           </div>
         </div>
 
-        {/* 3. Glucose (Nutrient) */}
-        <div className="glass-panel p-4 rounded-xl flex flex-col justify-between border-slate-200" title="Mass Balance: dS/dt = D*(S_feed - S) - q_s*X_v">
-          <div className="flex items-center justify-between mb-2">
-            <span className="text-xs font-bold text-slate-700 flex items-center gap-1.5">
-              <Droplet className="w-3.5 h-3.5 text-blue-600" />
-              Glucose (Nutrient)
+        {/* 3. Glucose Concentration */}
+        <div className="p-3.5 flex flex-col justify-between">
+          <div className="flex items-center justify-between gap-1 mb-1">
+            <span className="text-[11px] font-semibold text-slate-500 uppercase tracking-wide">
+              Glucose
             </span>
-            <span className={`text-[10px] font-bold px-1.5 py-0.5 rounded border ${
-              state.nutrient_concentration >= 1.5 ? 'text-emerald-700 bg-emerald-50 border-emerald-200' : 'text-red-700 bg-red-50 border-red-200'
-            }`}>
-              {state.nutrient_concentration >= 1.5 ? 'Normal Range' : 'Low Level'}
-            </span>
+            {isGlucoseAlarm && (
+              <span className="inline-flex items-center gap-1 text-[11px] font-semibold text-rose-700">
+                <span className="w-1.5 h-1.5 rounded-full bg-rose-500 shrink-0" />
+                Depleted
+              </span>
+            )}
           </div>
-          <div>
-            <div className="text-2xl font-bold text-slate-900 tracking-tight">
-              {state.nutrient_concentration.toFixed(2)} <span className="text-sm font-normal text-slate-500">g/L</span>
+
+          <div className="my-1">
+            <div className="flex items-baseline gap-1 font-mono tabular-nums">
+              <span className="text-xl sm:text-2xl font-bold text-slate-900 tracking-tight">
+                {state.nutrient_concentration.toFixed(2)}
+              </span>
+              <span className="text-xs font-semibold text-slate-600 font-mono">g/L</span>
             </div>
-            <p className="text-[11px] text-slate-500 mt-0.5">dS/dt Mass Balance</p>
+            <span className="text-[10px] text-slate-400 font-mono">substrate</span>
           </div>
-          <div className="mt-3 pt-2 border-t border-slate-100 flex items-center justify-between text-[11px] text-slate-500">
-            <span>Min Limit:</span>
-            <span className="font-mono text-slate-700">1.50 g/L</span>
+
+          <div className="flex items-center justify-between pt-2 border-t border-slate-100 mt-2">
+            <span className="text-[11px] text-slate-500 truncate">Setpoint ≥ 1.50</span>
+            <Sparkline data={sparklines.glucose} stroke={isGlucoseAlarm ? '#EF4444' : '#64748B'} />
           </div>
         </div>
 
-        {/* 4. Lactate (Metabolite) */}
-        <div className="glass-panel p-4 rounded-xl flex flex-col justify-between border-slate-200">
-          <div className="flex items-center justify-between mb-2">
-            <span className="text-xs font-bold text-slate-700 flex items-center gap-1.5">
-              <Flame className="w-3.5 h-3.5 text-amber-600" />
-              Lactate (Metabolite)
+        {/* 4. Lactate Concentration */}
+        <div className="p-3.5 flex flex-col justify-between">
+          <div className="flex items-center justify-between gap-1 mb-1">
+            <span className="text-[11px] font-semibold text-slate-500 uppercase tracking-wide">
+              Lactate
             </span>
-            <span className={`text-[10px] font-bold px-1.5 py-0.5 rounded border ${
-              state.metabolite_concentration <= 3.5 ? 'text-emerald-700 bg-emerald-50 border-emerald-200' : 'text-amber-700 bg-amber-50 border-amber-200'
-            }`}>
-              {state.metabolite_concentration <= 3.5 ? 'Below Limit' : 'Elevated'}
-            </span>
+            {isLactateAlarm && (
+              <span className="inline-flex items-center gap-1 text-[11px] font-semibold text-rose-700">
+                <span className="w-1.5 h-1.5 rounded-full bg-rose-500 shrink-0" />
+                High
+              </span>
+            )}
           </div>
-          <div>
-            <div className="text-2xl font-bold text-slate-900 tracking-tight">
-              {state.metabolite_concentration.toFixed(2)} <span className="text-sm font-normal text-slate-500">g/L</span>
+
+          <div className="my-1">
+            <div className="flex items-baseline gap-1 font-mono tabular-nums">
+              <span className="text-xl sm:text-2xl font-bold text-slate-900 tracking-tight">
+                {state.metabolite_concentration.toFixed(2)}
+              </span>
+              <span className="text-xs font-semibold text-slate-600 font-mono">g/L</span>
             </div>
-            <p className="text-[11px] text-slate-500 mt-0.5">Byproduct Concentration</p>
+            <span className="text-[10px] text-slate-400 font-mono">byproduct</span>
           </div>
-          <div className="mt-3 pt-2 border-t border-slate-100 flex items-center justify-between text-[11px] text-slate-500">
-            <span>Toxicity Limit:</span>
-            <span className="font-mono text-slate-700">3.50 g/L</span>
+
+          <div className="flex items-center justify-between pt-2 border-t border-slate-100 mt-2">
+            <span className="text-[11px] text-slate-500 truncate">Limit ≤ 3.50</span>
+            <Sparkline data={sparklines.lactate} stroke={isLactateAlarm ? '#EF4444' : '#64748B'} />
           </div>
         </div>
 
-        {/* 5. Perfusion Rate */}
-        <div className="glass-panel p-4 rounded-xl flex flex-col justify-between border-slate-200">
-          <div className="flex items-center justify-between mb-2">
-            <span className="text-xs font-bold text-slate-700 flex items-center gap-1.5">
-              <RefreshCw className="w-3.5 h-3.5 text-blue-600" />
-              Perfusion Rate
+        {/* 5. Product Titer */}
+        <div className="p-3.5 flex flex-col justify-between">
+          <div className="flex items-center justify-between gap-1 mb-1">
+            <span className="text-[11px] font-semibold text-slate-500 uppercase tracking-wide">
+              Product Titer
             </span>
-            <span className={`text-[10px] font-bold px-1.5 py-0.5 rounded border ${
-              state.controller_enabled ? 'text-blue-700 bg-blue-50 border-blue-200' : 'text-slate-600 bg-slate-100 border-slate-200'
-            }`}>
+          </div>
+
+          <div className="my-1">
+            <div className="flex items-baseline gap-1 font-mono tabular-nums">
+              <span className="text-xl sm:text-2xl font-bold text-slate-900 tracking-tight">
+                {state.product_concentration.toFixed(2)}
+              </span>
+              <span className="text-xs font-semibold text-slate-600 font-mono">g/L</span>
+            </div>
+            <span className="text-[10px] text-slate-400 font-mono">mAb protein</span>
+          </div>
+
+          <div className="flex items-center justify-between pt-2 border-t border-slate-100 mt-2">
+            <span className="text-[11px] text-slate-500 truncate">Yield metric</span>
+            <Sparkline data={sparklines.titer} stroke="#0F172A" />
+          </div>
+        </div>
+
+        {/* 6. Perfusion Rate */}
+        <div className="p-3.5 flex flex-col justify-between">
+          <div className="flex items-center justify-between gap-1 mb-1">
+            <span className="text-[11px] font-semibold text-slate-500 uppercase tracking-wide">
+              Perfusion
+            </span>
+            <span className="text-[10px] text-slate-400">
               {state.controller_enabled ? 'Adaptive' : 'Manual'}
             </span>
           </div>
-          <div>
-            <div className="text-2xl font-bold text-slate-900 tracking-tight">
-              {state.perfusion_rate.toFixed(2)} <span className="text-sm font-normal text-slate-500">VVD</span>
+
+          <div className="my-1">
+            <div className="flex items-baseline gap-1 font-mono tabular-nums">
+              <span className="text-xl sm:text-2xl font-bold text-slate-900 tracking-tight">
+                {state.perfusion_rate.toFixed(2)}
+              </span>
+              <span className="text-xs font-semibold text-slate-600 font-mono">VVD</span>
             </div>
-            <p className="text-[11px] text-slate-500 mt-0.5">Volumetric Exchange</p>
+            <span className="text-[10px] text-slate-400 font-mono">{flowRateLh} L/h</span>
           </div>
-          <div className="mt-3 pt-2 border-t border-slate-100 flex items-center justify-between text-[11px] text-slate-500">
-            <span>Flow Rate:</span>
-            <span className="font-mono text-slate-700">
-              {((state.perfusion_rate / 24.0) * state.reactor_volume).toFixed(3)} L/h
-            </span>
+
+          <div className="flex items-center justify-between pt-2 border-t border-slate-100 mt-2">
+            <span className="text-[11px] text-slate-500 truncate">0.2 – 4.0 range</span>
+            <Sparkline data={sparklines.perfusion} stroke="#2563EB" />
           </div>
         </div>
 
-        {/* 6. Filter Fouling Risk Index */}
-        <div className="glass-panel p-4 rounded-xl flex flex-col justify-between border-slate-200">
-          <div className="flex items-center justify-between mb-2">
-            <span className="text-xs font-bold text-slate-700 flex items-center gap-1.5">
-              <AlertTriangle className="w-3.5 h-3.5 text-amber-600" />
-              Fouling Risk Index
+        {/* 7. Filter Fouling */}
+        <div className="p-3.5 flex flex-col justify-between">
+          <div className="flex items-center justify-between gap-1 mb-1">
+            <span className="text-[11px] font-semibold text-slate-500 uppercase tracking-wide">
+              Filter Fouling
             </span>
-            <span className={`text-[10px] font-mono font-bold px-2 py-0.5 rounded border ${getFoulingBadgeClass(state.fouling_state)}`}>
-              {state.fouling_state}
-            </span>
+            {isFoulingAlarm && (
+              <span className="inline-flex items-center gap-1 text-[11px] font-semibold text-rose-700">
+                <span className="w-1.5 h-1.5 rounded-full bg-rose-500 shrink-0" />
+                Clogged
+              </span>
+            )}
           </div>
-          <div>
-            <div className="text-2xl font-bold text-slate-900 tracking-tight">
-              {state.fouling_index.toFixed(1)} <span className="text-sm font-normal text-slate-500">/ 100</span>
+
+          <div className="my-1">
+            <div className="flex items-baseline gap-1 font-mono tabular-nums">
+              <span className="text-xl sm:text-2xl font-bold text-slate-900 tracking-tight">
+                {state.fouling_index.toFixed(1)}
+              </span>
+              <span className="text-xs font-semibold text-slate-400 font-mono">/ 100</span>
             </div>
-            <p className="text-[11px] text-slate-500 mt-0.5">Membrane Loading Proxy</p>
+            <span className="text-[10px] text-slate-400 font-mono">resistance</span>
           </div>
-          <div className="mt-3 pt-2 border-t border-slate-100 flex items-center justify-between text-[11px] text-slate-500">
-            <span>Warning Limit:</span>
-            <span className="font-mono text-slate-700">70 / 100</span>
+
+          <div className="flex items-center justify-between pt-2 border-t border-slate-100 mt-2">
+            <span className="text-[11px] text-slate-500 truncate">Warning limit 70</span>
+            <Sparkline data={sparklines.fouling} stroke={isFoulingAlarm ? '#EF4444' : '#64748B'} />
           </div>
         </div>
+
       </div>
     </div>
   );

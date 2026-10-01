@@ -52,7 +52,7 @@ def test_api_scenario_comparison():
     data = response.json()
     assert "uncontrolled_scenario" in data
     assert "controlled_scenario" in data
-    assert len(data["comparison_table"]) == 6
+    assert len(data["comparison_table"]) == 7
 
 
 def test_api_demo_scenario():
@@ -61,7 +61,7 @@ def test_api_demo_scenario():
     data = response.json()
     assert data["status"] == "demo_executed"
     assert "comparison_result" in data
-    assert len(data["comparison_result"]["comparison_table"]) == 6
+    assert len(data["comparison_result"]["comparison_table"]) == 7
 
 
 def test_api_fault_injection():

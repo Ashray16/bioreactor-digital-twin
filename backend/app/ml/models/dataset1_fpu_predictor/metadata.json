@@ -1,0 +1,38 @@
+{
+  "model_id": "dataset1_fpu_predictor",
+  "model_version": "v1.0",
+  "dataset": "Aggregated_data_with_1000_runs.xlsx",
+  "dataset_source": "Kaggle Fungal Cellulase Bioreactor Dataset (Trichoderma reesei)",
+  "process_type": "Trichoderma reesei cellulase enzyme fermentation",
+  "target": "Max FPU/ml",
+  "target_unit": "FPU/ml",
+  "features": [
+    "temperature",
+    "pH",
+    "dissolved_oxygen_min",
+    "inoculum_volume_ml",
+    "agitation_rpm",
+    "lactose_feed_volume_ml",
+    "culture_duration_days",
+    "media_volume_ml"
+  ],
+  "algorithm": "Linear Regression",
+  "training_rows": 700,
+  "validation_rows": 150,
+  "test_rows": 150,
+  "random_seed": 42,
+  "training_timestamp": "2026-08-13T11:58:15.153992",
+  "validation_metrics": {
+    "mae": 1.8573,
+    "rmse": 2.3248,
+    "r2": -0.014
+  },
+  "test_metrics": {
+    "mae": 1.9302,
+    "rmse": 2.3772,
+    "r2": -0.0044
+  },
+  "cross_validation_r2_mean": -0.0132,
+  "cross_validation_r2_std": 0.0134,
+  "feature_importances": {}
+}
