@@ -8,8 +8,9 @@ import {
   SensitivityResponse,
 } from '../types/simulation';
 
-const API_BASE = 'http://127.0.0.1:8000/api/v1/simulation';
-const ANALYTICS_API_BASE = 'http://127.0.0.1:8000/api/v1/analytics';
+const BACKEND_BASE = (import.meta.env.VITE_API_BASE_URL || (import.meta.env.DEV ? 'http://127.0.0.1:8000' : '')).replace(/\/$/, '');
+const API_BASE = `${BACKEND_BASE}/api/v1/simulation`;
+const ANALYTICS_API_BASE = `${BACKEND_BASE}/api/v1/analytics`;
 
 export async function fetchDefaultConfig(): Promise<BioreactorConfig> {
   const res = await fetch(`${API_BASE}/config/default`);

@@ -7,7 +7,8 @@ import {
   TiterModelPerformance,
 } from '../types/ai';
 
-const AI_API_BASE = 'http://127.0.0.1:8000/ai';
+const BACKEND_BASE = (import.meta.env.VITE_API_BASE_URL || (import.meta.env.DEV ? 'http://127.0.0.1:8000' : '')).replace(/\/$/, '');
+const AI_API_BASE = `${BACKEND_BASE}/ai`;
 
 export async function fetchTiterModelInfo(): Promise<TiterModelInfo> {
   const res = await fetch(`${AI_API_BASE}/model-info/titer`);
