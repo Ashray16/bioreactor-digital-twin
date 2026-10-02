@@ -218,8 +218,8 @@ export default function ControllerPanel({
   const bottomPlotHeight = 150;
   const maxTime = Math.max(120, state.simulation_time, ...chartData.map((d) => d.time));
 
-  // Compute SVG polyline paths
-  const scaleX = (t: number) => 50 + (t / maxTime) * (svgWidth - 70);
+  // Compute SVG polyline paths (dual Y-axis: left 50px for g/L, right 60px for Fouling %)
+  const scaleX = (t: number) => 50 + (t / maxTime) * (svgWidth - 110);
   const scaleYPerfusion = (d: number) => topPlotHeight - 20 - ((d - 0) / (maxVvd * 1.15)) * (topPlotHeight - 35);
   const scaleYConcentration = (c: number) => bottomPlotHeight - 25 - ((c - 0) / 10.0) * (bottomPlotHeight - 40); // 0 to 10 g/L
   const scaleYFouling = (f: number) => bottomPlotHeight - 25 - ((f - 0) / 100.0) * (bottomPlotHeight - 40); // 0 to 100%
@@ -601,7 +601,7 @@ export default function ControllerPanel({
               const rect = e.currentTarget.getBoundingClientRect();
               const mouseX = e.clientX - rect.left;
               const normalizedX = (mouseX / rect.width) * svgWidth;
-              const targetTime = ((normalizedX - 50) / (svgWidth - 70)) * maxTime;
+              const targetTime = ((normalizedX - 50) / (svgWidth - 110)) * maxTime;
               if (targetTime >= 0 && targetTime <= maxTime && chartData.length > 0) {
                 let closest = chartData[0];
                 let minDiff = Math.abs(chartData[0].time - targetTime);
@@ -625,10 +625,10 @@ export default function ControllerPanel({
               </text>
 
               {/* Horizontal gridlines for top lane */}
-              <line x1="50" y1={scaleYPerfusion(0)} x2={svgWidth - 20} y2={scaleYPerfusion(0)} stroke="#E2E8F0" strokeWidth="1" />
-              <line x1="50" y1={scaleYPerfusion(1.0)} x2={svgWidth - 20} y2={scaleYPerfusion(1.0)} stroke="#E2E8F0" strokeWidth="1" strokeDasharray="3 3" />
-              <line x1="50" y1={scaleYPerfusion(2.0)} x2={svgWidth - 20} y2={scaleYPerfusion(2.0)} stroke="#E2E8F0" strokeWidth="1" strokeDasharray="3 3" />
-              <line x1="50" y1={scaleYPerfusion(maxVvd)} x2={svgWidth - 20} y2={scaleYPerfusion(maxVvd)} stroke="#CBD5E1" strokeWidth="1" strokeDasharray="2 2" />
+              <line x1="50" y1={scaleYPerfusion(0)} x2={svgWidth - 60} y2={scaleYPerfusion(0)} stroke="#E2E8F0" strokeWidth="1" />
+              <line x1="50" y1={scaleYPerfusion(1.0)} x2={svgWidth - 60} y2={scaleYPerfusion(1.0)} stroke="#E2E8F0" strokeWidth="1" strokeDasharray="3 3" />
+              <line x1="50" y1={scaleYPerfusion(2.0)} x2={svgWidth - 60} y2={scaleYPerfusion(2.0)} stroke="#E2E8F0" strokeWidth="1" strokeDasharray="3 3" />
+              <line x1="50" y1={scaleYPerfusion(maxVvd)} x2={svgWidth - 60} y2={scaleYPerfusion(maxVvd)} stroke="#CBD5E1" strokeWidth="1" strokeDasharray="2 2" />
 
               <text x="45" y={scaleYPerfusion(0) + 3} fill="#94A3B8" fontSize="9" textAnchor="end" fontFamily="monospace">0.0</text>
               <text x="45" y={scaleYPerfusion(1.0) + 3} fill="#94A3B8" fontSize="9" textAnchor="end" fontFamily="monospace">1.0</text>
@@ -684,86 +684,86 @@ export default function ControllerPanel({
             {/* Divider between lanes */}
             <line x1="20" y1={topPlotHeight} x2={svgWidth - 10} y2={topPlotHeight} stroke="#E2E8F0" strokeWidth="1" />
 
-            {/* Bottom Lane: Process Variables & Threshold Guides */}
+            {/* Bottom Lane: Dual Y-Axis Process Variables & Threshold Guides */}
             <g transform={`translate(0, ${topPlotHeight})`}>
+              {/* Lane Headers for Dual Axes */}
               <text x="50" y="16" fill="#475569" fontSize="10" fontWeight="600">
-                Process Variables (Glucose &amp; Lactate [g/L], Fouling [%])
+                Left Axis: Glucose &amp; Lactate [g/L]
+              </text>
+              <text x={svgWidth - 60} y="16" fill="#7C3AED" fontSize="10" fontWeight="600" textAnchor="end">
+                Right Axis: Fouling Risk [%]
               </text>
 
-              {/* Y Axis Guides */}
-              <line x1="50" y1={scaleYConcentration(0)} x2={svgWidth - 20} y2={scaleYConcentration(0)} stroke="#E2E8F0" strokeWidth="1" />
-              <line x1="50" y1={scaleYConcentration(5.0)} x2={svgWidth - 20} y2={scaleYConcentration(5.0)} stroke="#E2E8F0" strokeWidth="1" strokeDasharray="3 3" />
-              <line x1="50" y1={scaleYConcentration(10.0)} x2={svgWidth - 20} y2={scaleYConcentration(10.0)} stroke="#CBD5E1" strokeWidth="1" strokeDasharray="3 3" />
+              {/* Left Y Axis Guides (Concentration 0 to 10 g/L) */}
+              <line x1="50" y1={scaleYConcentration(0)} x2={svgWidth - 60} y2={scaleYConcentration(0)} stroke="#E2E8F0" strokeWidth="1" />
+              <line x1="50" y1={scaleYConcentration(5.0)} x2={svgWidth - 60} y2={scaleYConcentration(5.0)} stroke="#E2E8F0" strokeWidth="1" strokeDasharray="3 3" />
+              <line x1="50" y1={scaleYConcentration(10.0)} x2={svgWidth - 60} y2={scaleYConcentration(10.0)} stroke="#CBD5E1" strokeWidth="1" strokeDasharray="3 3" />
 
               <text x="45" y={scaleYConcentration(0) + 3} fill="#94A3B8" fontSize="9" textAnchor="end" fontFamily="monospace">0</text>
               <text x="45" y={scaleYConcentration(5.0) + 3} fill="#94A3B8" fontSize="9" textAnchor="end" fontFamily="monospace">5 g/L</text>
               <text x="45" y={scaleYConcentration(10.0) + 3} fill="#94A3B8" fontSize="9" textAnchor="end" fontFamily="monospace">10</text>
 
+              {/* Right Y Axis Vertical Line & Ticks (Fouling 0% to 100%) */}
+              <line x1={svgWidth - 60} y1={scaleYFouling(0)} x2={svgWidth - 60} y2={scaleYFouling(100)} stroke="#DDD6FE" strokeWidth="1.2" />
+              <text x={svgWidth - 55} y={scaleYFouling(0) + 3} fill="#8B5CF6" fontSize="9" textAnchor="start" fontFamily="monospace">0%</text>
+              <text x={svgWidth - 55} y={scaleYFouling(50) + 3} fill="#8B5CF6" fontSize="9" textAnchor="start" fontFamily="monospace">50%</text>
+              <text x={svgWidth - 55} y={scaleYFouling(foulingLimit) + 3} fill="#7C3AED" fontSize="9" textAnchor="start" fontFamily="monospace" fontWeight="bold">70% Limit</text>
+              <text x={svgWidth - 55} y={scaleYFouling(100) + 3} fill="#8B5CF6" fontSize="9" textAnchor="start" fontFamily="monospace">100%</text>
+
               {/* Threshold Guide Lines */}
-              {/* 1. Glucose Low Threshold */}
+              {/* 1. Glucose Low Threshold (Left scale) */}
               <line
                 x1="50"
                 y1={scaleYConcentration(glucoseLimit)}
-                x2={svgWidth - 20}
+                x2={svgWidth - 60}
                 y2={scaleYConcentration(glucoseLimit)}
                 stroke="#F59E0B"
                 strokeWidth="1.2"
                 strokeDasharray="4 4"
               />
               <text
-                x={svgWidth - 25}
-                y={scaleYConcentration(glucoseLimit) - 3}
+                x="55"
+                y={scaleYConcentration(glucoseLimit) - 4}
                 fill="#D97706"
                 fontSize="9"
-                textAnchor="end"
+                textAnchor="start"
                 fontFamily="sans-serif"
                 fontWeight="500"
               >
-                Glucose limit ({glucoseLimit.toFixed(1)} g/L)
+                Glucose trip limit ({glucoseLimit.toFixed(1)} g/L)
               </text>
 
-              {/* 2. Fouling Threshold (70%) */}
+              {/* 2. Fouling Threshold (Right scale: 70%) */}
               <line
                 x1="50"
                 y1={scaleYFouling(foulingLimit)}
-                x2={svgWidth - 20}
+                x2={svgWidth - 60}
                 y2={scaleYFouling(foulingLimit)}
                 stroke="#8B5CF6"
                 strokeWidth="1.2"
                 strokeDasharray="4 4"
               />
-              <text
-                x={svgWidth - 25}
-                y={scaleYFouling(foulingLimit) - 3}
-                fill="#7C3AED"
-                fontSize="9"
-                textAnchor="end"
-                fontFamily="sans-serif"
-                fontWeight="500"
-              >
-                Fouling limit ({foulingLimit.toFixed(0)}%)
-              </text>
 
-              {/* 3. Lactate Threshold */}
+              {/* 3. Lactate Threshold (Left scale) */}
               <line
                 x1="50"
                 y1={scaleYConcentration(lactateLimit)}
-                x2={svgWidth - 20}
+                x2={svgWidth - 60}
                 y2={scaleYConcentration(lactateLimit)}
                 stroke="#F43F5E"
                 strokeWidth="1.2"
                 strokeDasharray="4 4"
               />
               <text
-                x={svgWidth - 25}
-                y={scaleYConcentration(lactateLimit) - 3}
+                x="55"
+                y={scaleYConcentration(lactateLimit) - 4}
                 fill="#E11D48"
                 fontSize="9"
-                textAnchor="end"
+                textAnchor="start"
                 fontFamily="sans-serif"
                 fontWeight="500"
               >
-                Lactate limit ({lactateLimit.toFixed(1)} g/L)
+                Lactate warning limit ({lactateLimit.toFixed(1)} g/L)
               </text>
 
               {/* Traces */}

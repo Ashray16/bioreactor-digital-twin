@@ -1,6 +1,7 @@
 import { SimulationHistoryItem, ControllerActionInfo } from '../../types/simulation';
 import { useAI } from '../../context/AIContext';
 import { CheckCircle2, ShieldCheck, Zap, Sparkles } from 'lucide-react';
+import { GLUCOSE_THRESHOLD_LOW, FOULING_THRESHOLD_HIGH } from '../../config/constants';
 
 interface EventLogProps {
   history: SimulationHistoryItem[];
@@ -48,7 +49,7 @@ export default function EventLog({ history, latestAction, activeFault, targetCel
       });
     }
 
-    if (h.fouling_index >= 70.0 && !events.some((e) => e.time === h.time && e.category === 'PROCESS' && e.title.includes('Fouling'))) {
+    if (h.fouling_index >= FOULING_THRESHOLD_HIGH && !events.some((e) => e.time === h.time && e.category === 'PROCESS' && e.title.includes('Fouling'))) {
       events.push({
         time: h.time,
         category: 'PROCESS',
@@ -57,12 +58,12 @@ export default function EventLog({ history, latestAction, activeFault, targetCel
       });
     }
 
-    if (h.nutrient_concentration < 1.5 && !events.some((e) => e.time === h.time && e.title.includes('Low Glucose'))) {
+    if (h.nutrient_concentration < GLUCOSE_THRESHOLD_LOW && !events.some((e) => e.time === h.time && e.title.includes('Low Glucose'))) {
       events.push({
         time: h.time,
         category: 'PROCESS',
         title: 'Low Glucose Alert',
-        desc: `Substrate concentration dropped to ${h.nutrient_concentration.toFixed(2)} g/L (<1.5 g/L).`,
+        desc: `Substrate concentration dropped to ${h.nutrient_concentration.toFixed(2)} g/L (<${GLUCOSE_THRESHOLD_LOW.toFixed(1)} g/L).`,
       });
     }
   });

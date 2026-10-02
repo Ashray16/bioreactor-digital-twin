@@ -347,7 +347,7 @@ export default function ComparisonChart({
             isAnimationActive={false}
           />
 
-          {/* Shaded Disturbance Window */}
+          {/* Shaded Disturbance Window (Labeled once in shared legend) */}
           {disturbanceWindow && (
             <ReferenceArea
               x1={disturbanceWindow.start}
@@ -355,14 +355,6 @@ export default function ComparisonChart({
               fill="rgba(244, 63, 94, 0.08)"
               stroke="rgba(244, 63, 94, 0.35)"
               strokeDasharray="3 3"
-              label={{
-                value: disturbanceWindow.label || 'Disturbance Window',
-                fill: '#BE123C',
-                fontSize: 9,
-                position: 'insideTopLeft',
-                fontFamily: 'sans-serif',
-                fontWeight: 'bold',
-              }}
             />
           )}
 

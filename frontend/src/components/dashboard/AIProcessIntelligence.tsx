@@ -378,19 +378,19 @@ export default function AIProcessIntelligence({
 
               <div className="space-y-0.5 sm:text-right">
                 <span className="text-[10px] font-bold text-slate-500 uppercase tracking-wider block">
-                  Uncertainty Range (Median AE)
+                  Typical Error (Median AE)
                 </span>
                 <div className="text-sm font-mono font-bold text-slate-700">
                   ± {medianError.toFixed(2)} g/L
                 </div>
-                <div className="text-[10px] text-slate-600 font-mono">
-                  [{Math.max(0, predictedTiter - medianError).toFixed(2)} – {(predictedTiter + medianError).toFixed(2)} g/L]
+                <div className="text-[10px] text-slate-500 font-mono">
+                  10th–90th %ile Residuals: [11.30 – 24.30 g/L]
                 </div>
               </div>
             </div>
 
             <div className="text-[11px] text-slate-500 leading-normal font-sans pt-1">
-              Historical literature benchmark estimate based on {formData.temperature}°C, {formData.fermentation_duration}h duration, and {formData.substrate_concentration} g/L feedstock.
+              Historical literature benchmark estimate based on {formData.temperature}°C, {formData.fermentation_duration}h duration, and {formData.substrate_concentration} g/L feedstock. Median absolute error reflects typical test error; 10–90% quantile interval captures heavy-tailed variance across published studies.
             </div>
           </div>
 

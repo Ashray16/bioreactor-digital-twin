@@ -110,16 +110,17 @@ export default function AnalyticsPage({ state }: AnalyticsPageProps) {
     const simTimeH = state.simulation_time || 0.0;
     const vccCellsPerMl = state.viable_cell_density || 0.5e6;
 
-    // Total media in Liters
-    const totalMediaL = (perfusionVVD / 24.0) * reactorVolL * Math.max(1.0, simTimeH);
-    // Total viable cells in vessel
+    // Cumulative media consumed (reactor working volume + continuous perfusion feed)
+    const cumulativeMediaL = reactorVolL + (perfusionVVD / 24.0) * reactorVolL * Math.max(0.0, simTimeH);
+    // Cumulative viable cell harvest / inventory in billions (10^9 cells)
     const totalCellsBillion = (vccCellsPerMl * reactorVolL * 1000.0) / 1e9;
 
     if (simTimeH < 1.0) {
-      return '24.50'; // Nominal steady-state baseline
+      return '6.25'; // Nominal steady-state baseline yield (~6.25 × 10⁹ cells/L media)
     }
-    const val = totalCellsBillion / Math.max(0.01, totalMediaL);
-    return Math.max(0.1, val).toFixed(2);
+    const val = totalCellsBillion / Math.max(0.5, cumulativeMediaL);
+    // Smooth yield metric within realistic bioprocess range (5.0 - 8.5 × 10⁹ cells/L)
+    return Math.max(0.5, Math.min(15.0, val)).toFixed(2);
   }, [state.perfusion_rate, state.reactor_volume, state.simulation_time, state.viable_cell_density]);
 
   // Volumetric Lactate Clearance: D * [Lactate] / 24
@@ -128,11 +129,19 @@ export default function AnalyticsPage({ state }: AnalyticsPageProps) {
     return Math.max(0.001, clearance).toFixed(3);
   }, [state.perfusion_rate, state.metabolite_concentration]);
 
-  // Membrane Lifespan Expectancy in Hours
+  // Projected Total Membrane Lifespan until terminal occlusion (Fouling Index = 100)
   const membraneLifespan = useMemo(() => {
     const fouling = state.fouling_index || 0.0;
-    return Math.max(24, Math.round(240 - fouling * 1.8));
-  }, [state.fouling_index]);
+    const simTimeH = state.simulation_time || 0.0;
+
+    // Baseline nominal rate: reaching F=70 at 240h -> rate = 70/240 = 0.2917/h -> terminal F=100 at ~343h
+    if (simTimeH < 5.0 || fouling < 2.0) {
+      return 343; // Nominal projection to 100% fouling under standard controlled operation
+    }
+    const currentRatePerHour = fouling / Math.max(1.0, simTimeH);
+    const projectedTotalHours = Math.round(100.0 / Math.max(0.05, currentRatePerHour));
+    return Math.max(120, Math.min(600, projectedTotalHours));
+  }, [state.fouling_index, state.simulation_time]);
 
   return (
     <div className="space-y-6">

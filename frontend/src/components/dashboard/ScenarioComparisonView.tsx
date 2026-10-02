@@ -61,7 +61,7 @@ export default function ScenarioComparisonView({
       };
     }
     if (preset === 'nutrient_stress') {
-      return { start: 60.0, end: 96.0, label: 'Nutrient Stress Window (60h–96h)' };
+      return { start: 60.0, end: 100.0, label: 'Feed Interruption (60h–100h)' };
     }
     if (preset === 'fouling_surge') {
       return { start: 72.0, end: 112.0, label: 'Fouling Surge Window (72h–112h)' };
@@ -428,6 +428,17 @@ export default function ScenarioComparisonView({
             </svg>
             <span>Target</span>
           </button>
+
+          {/* Disturbance Window chip (labeled once in shared legend) */}
+          {disturbanceWindow && (
+            <div
+              className="flex items-center gap-1.5 px-2 py-1 rounded border border-rose-200 bg-rose-50/70 text-rose-800 text-[11px] font-medium"
+              title="Shaded process disturbance time window"
+            >
+              <span className="w-3.5 h-2 rounded-xs bg-rose-500/25 border border-dashed border-rose-400 inline-block" />
+              <span>{disturbanceWindow.label || 'Disturbance Window'}</span>
+            </div>
+          )}
         </div>
 
         {/* Global Toolbar Actions */}
@@ -558,9 +569,9 @@ export default function ScenarioComparisonView({
         </div>
       </div>
 
-      {/* Outcome Banner (Compact single-line) */}
-      <div className="bg-slate-50 border border-slate-200 rounded-lg px-3 py-2 flex items-center justify-between gap-3 text-xs shadow-xs">
-        <div className="flex items-center gap-2 min-w-0">
+      {/* Outcome Banner */}
+      <div className="bg-slate-50 border border-slate-200 rounded-lg px-3.5 py-2 flex flex-wrap items-center justify-between gap-2.5 text-xs shadow-xs">
+        <div className="flex items-center gap-2 min-w-0 flex-1">
           <span className={`px-2 py-0.5 rounded text-[10px] font-bold uppercase shrink-0 border ${
             data.overall_outcome === 'TRADE-OFF'
               ? 'bg-amber-50 text-amber-800 border-amber-300'
@@ -570,14 +581,15 @@ export default function ScenarioComparisonView({
           }`}>
             {data.overall_outcome === 'TRADE-OFF' ? 'Multi-Objective Trade-Off' : data.overall_outcome === 'IMPROVED' ? 'Controlled Improved' : 'Nominal Match'}
           </span>
-          <p className="text-[11px] text-slate-650 truncate">
+          <p className="text-[11px] text-slate-700 font-medium leading-tight">
             {data.outcome_summary}
           </p>
         </div>
         {data.divergence_cause && (
-          <span className="text-[10px] font-mono text-blue-700 bg-blue-50/70 border border-blue-200 px-2 py-0.5 rounded shrink-0 hidden md:inline">
-            Trigger: {data.divergence_cause.split('.')[0]}
-          </span>
+          <div className="flex items-center gap-1.5 text-[11px] font-sans text-blue-900 bg-blue-50/80 border border-blue-200 px-2.5 py-1 rounded-md shrink-0">
+            <span className="font-bold text-blue-900">Trigger:</span>
+            <span className="font-mono text-[10px] text-blue-700 font-semibold">{data.divergence_cause.split('.')[0]}</span>
+          </div>
         )}
       </div>
 

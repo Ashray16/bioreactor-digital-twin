@@ -1,9 +1,10 @@
 import { useState, useMemo, useEffect } from 'react';
-import { AlertCircle, Loader2 } from 'lucide-react';
+import { AlertCircle, Loader2, Maximize2 } from 'lucide-react';
 import { TimeSeriesDataPoint, CompositeEventMarker, OperatingEnvelope, SeriesConfig } from './chartTypes';
 import TimeSeriesChart from './TimeSeriesChart';
 import ChartToolbar from './ChartToolbar';
 import { MetaTag } from '../common/Badges';
+import { GLUCOSE_THRESHOLD_LOW, LACTATE_THRESHOLD_HIGH } from '../../config/constants';
 
 interface AnalyticalChartProps {
   title: string;
@@ -20,6 +21,9 @@ interface AnalyticalChartProps {
   error?: string | null;
   height?: number;
   disturbanceWindow?: { start: number; end: number; label?: string } | null;
+  hideToolbar?: boolean;
+  showEventsProp?: boolean;
+  visibleDomainProp?: [number, number] | null;
 }
 
 export default function AnalyticalChart({
@@ -35,8 +39,11 @@ export default function AnalyticalChart({
   syncId,
   loading = false,
   error = null,
-  height = 220,
+  height = 200,
   disturbanceWindow = null,
+  hideToolbar = false,
+  showEventsProp,
+  visibleDomainProp,
 }: AnalyticalChartProps) {
   const [visibleDomain, setVisibleDomain] = useState<[number, number] | null>(null);
   const [timeRange, setTimeRange] = useState<string>('ALL');
@@ -83,12 +90,15 @@ export default function AnalyticalChart({
     setTimeRange('ALL');
   };
 
+  const effectiveDomain = visibleDomainProp !== undefined ? visibleDomainProp : visibleDomain;
+  const effectiveShowEvents = showEventsProp !== undefined ? showEventsProp : showEvents;
+
   // Visible Data calculations
   const visibleData = useMemo(() => {
-    if (!visibleDomain) return data;
-    const [min, max] = visibleDomain;
+    if (!effectiveDomain) return data;
+    const [min, max] = effectiveDomain;
     return data.filter((d) => d.time >= min && d.time <= max);
-  }, [data, visibleDomain]);
+  }, [data, effectiveDomain]);
 
   // Statistics calculation for all active keys in visible data
   const stats = useMemo(() => {
@@ -193,7 +203,7 @@ export default function AnalyticalChart({
       );
     }
 
-    const activeDataset = visibleDomain ? visibleData : data;
+    const activeDataset = (isModal ? visibleDomain : effectiveDomain) ? visibleData : data;
     const chartData = activeDataset.length > 500 ? downsampleData(activeDataset, 500) : activeDataset;
 
     return (
@@ -201,9 +211,9 @@ export default function AnalyticalChart({
         data={chartData}
         series={filteredSeriesConfigs}
         syncId={syncId}
-        visibleDomain={visibleDomain}
+        visibleDomain={isModal ? visibleDomain : effectiveDomain}
         onZoom={handleZoom}
-        showEvents={showEvents}
+        showEvents={isModal ? showEvents : effectiveShowEvents}
         events={events}
         targets={targets}
         envelopes={envelopes}
@@ -223,39 +233,52 @@ export default function AnalyticalChart({
         className="border border-slate-200 rounded-md bg-white p-4 space-y-3 shadow-none font-sans"
       >
         {/* Header Block */}
-        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 border-b border-slate-100 pb-2.5">
+        <div className="flex items-start justify-between gap-2 border-b border-slate-100 pb-2">
           <div>
-            <h3 className="text-xs font-semibold text-slate-800 uppercase tracking-wide">
+            <h3 className="text-xs font-semibold text-slate-900">
               {title}
             </h3>
-            {subtitle && <p className="text-[11px] text-slate-500 mt-0.5">{subtitle}</p>}
+            {subtitle && <p className="text-[10px] text-slate-500 mt-0.5">{subtitle}</p>}
           </div>
 
-          {/* Interactive Legend for Toggling Series */}
-          {series.length > 1 && (
-            <div className="flex flex-wrap gap-2 text-[10px] font-bold">
-              {series.map((s) => {
-                const active = visibleKeys.includes(s.key);
-                return (
-                  <button
-                    key={s.key}
-                    onClick={() => handleToggleSeries(s.key)}
-                    className={`flex items-center gap-1.5 px-2 py-1 rounded border transition ${
-                      active
-                        ? 'bg-slate-50 border-slate-200 text-slate-700'
-                        : 'bg-white border-slate-100 text-slate-500 hover:bg-slate-50'
-                    }`}
-                  >
-                    <span
-                      className="w-1.5 h-1.5 rounded-full shrink-0"
-                      style={{ backgroundColor: active ? s.stroke : '#CBD5E1' }}
-                    />
-                    <span>{s.name}</span>
-                  </button>
-                );
-              })}
-            </div>
-          )}
+          <div className="flex items-center gap-1.5 shrink-0">
+            {/* Interactive Legend for Toggling Series */}
+            {series.length > 1 && (
+              <div className="flex flex-wrap gap-1 text-[10px] font-medium">
+                {series.map((s) => {
+                  const active = visibleKeys.includes(s.key);
+                  return (
+                    <button
+                      key={s.key}
+                      onClick={() => handleToggleSeries(s.key)}
+                      className={`flex items-center gap-1 px-1.5 py-0.5 rounded border transition ${
+                        active
+                          ? 'bg-slate-50 border-slate-200 text-slate-700'
+                          : 'bg-white border-slate-100 text-slate-400 hover:bg-slate-50'
+                      }`}
+                    >
+                      <span
+                        className="w-1.5 h-1.5 rounded-full shrink-0"
+                        style={{ backgroundColor: active ? s.stroke : '#CBD5E1' }}
+                      />
+                      <span>{s.name}</span>
+                    </button>
+                  );
+                })}
+              </div>
+            )}
+
+            {/* Header Maximize Button */}
+            <button
+              type="button"
+              onClick={() => setIsMaximized(true)}
+              title={`Maximize ${title}`}
+              aria-label={`Maximize ${title}`}
+              className="p-1 rounded text-slate-400 hover:text-slate-700 hover:bg-slate-100 transition cursor-pointer"
+            >
+              <Maximize2 className="w-3.5 h-3.5" />
+            </button>
+          </div>
         </div>
 
         {/* Visibility stats row if loaded */}
@@ -292,22 +315,22 @@ export default function AnalyticalChart({
                 } else if (s.key === 'glucose') {
                   currentFormatted = `${valStats.current.toFixed(2)} g/L`;
                   changeFormatted = `Δ ${valStats.trend >= 0 ? '+' : '−'}${Math.abs(valStats.trend).toFixed(2)}`;
-                  if (valStats.current < 1.5) {
+                  if (valStats.current < GLUCOSE_THRESHOLD_LOW) {
                     alertElement = (
                       <span className="inline-flex items-center gap-1 text-[11px] font-semibold text-rose-700 font-sans">
                         <span className="w-1.5 h-1.5 rounded-full bg-rose-500" />
-                        Low (&lt;1.5 g/L)
+                        Low (&lt;{GLUCOSE_THRESHOLD_LOW.toFixed(1)} g/L)
                       </span>
                     );
                   }
                 } else if (s.key === 'lactate') {
                   currentFormatted = `${valStats.current.toFixed(2)} g/L`;
                   changeFormatted = `Δ ${valStats.trend >= 0 ? '+' : '−'}${Math.abs(valStats.trend).toFixed(2)}`;
-                  if (valStats.current > 3.5) {
+                  if (valStats.current > LACTATE_THRESHOLD_HIGH) {
                     alertElement = (
                       <span className="inline-flex items-center gap-1 text-[11px] font-semibold text-rose-700 font-sans">
                         <span className="w-1.5 h-1.5 rounded-full bg-rose-500" />
-                        High (&gt;3.5 g/L)
+                        High (&gt;{LACTATE_THRESHOLD_HIGH.toFixed(1)} g/L)
                       </span>
                     );
                   }
@@ -377,7 +400,7 @@ export default function AnalyticalChart({
         )}
 
         {/* Toolbar Controls */}
-        {data.length > 0 && !loading && !error && (
+        {!hideToolbar && data.length > 0 && !loading && !error && (
           <ChartToolbar
             isMaximized={false}
             onToggleMaximize={() => setIsMaximized(true)}

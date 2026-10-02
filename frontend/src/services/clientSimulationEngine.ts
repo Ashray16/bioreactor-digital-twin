@@ -27,40 +27,13 @@ import defaultSensitivityData from './default_sensitivity.json';
 import defaultTiterInfoData from './default_titer_info.json';
 import defaultTiterPerfData from './default_titer_perf.json';
 import defaultSimilaritySample from './default_similarity_sample.json';
+import {
+  DEFAULT_BIOREACTOR_CONFIG,
+  DISTURBANCE_PRESETS,
+} from '../config/constants';
 
 export const DEFAULT_CONFIG: BioreactorConfig = {
-  reactor_volume: 2.0,
-  initial_cell_density: 0.5e6,
-  target_cell_density: 1.0e8,
-  initial_viability: 98.0,
-  max_growth_rate: 0.035,
-  death_rate_base: 0.002,
-  max_sustainable_density: 1.5e8,
-  initial_nutrient: 3.0,
-  feed_nutrient_concentration: 7.0,
-  cell_nutrient_consumption_rate: 5.0e-9,
-  monod_constant_nutrient: 0.5,
-  initial_metabolite: 0.2,
-  cell_metabolite_yield: 4.0e-9,
-  metabolite_inhibition_constant: 4.0,
-  initial_product: 0.0,
-  specific_productivity_qp: 1.0e-9,
-  perfusion_rate: 0.4,
-  min_perfusion_rate: 0.2,
-  max_perfusion_rate: 4.0,
-  filter_area: 0.1,
-  fouling_sensitivity: 1.0,
-  fouling_warning_threshold: 70.0,
-  nutrient_threshold_low: 2.0,
-  metabolite_threshold_high: 3.5,
-  fouling_threshold_high: 70.0,
-  step_increment_vvd: 0.3,
-  temperature: 37.0,
-  ph: 7.2,
-  simulation_duration: 240.0,
-  timestep: 0.5,
-  control_enabled: false,
-  control_mode: 'rule_based',
+  ...DEFAULT_BIOREACTOR_CONFIG,
 };
 
 // --- Mathematical Helper Functions ---
@@ -169,11 +142,12 @@ export class ClientRuleBasedController {
     let actionType = 'NO_ACTION';
     let reason = '';
 
-    if (state.fouling_index >= foulingLimit) {
+    // Strictly enforce foulingLimit (70.0) ceiling: throttle preemptively when approaching limit
+    if (state.fouling_index >= foulingLimit - 1.5) {
       if (currentPerfusion > config.min_perfusion_rate) {
         targetPerfusion = Math.max(config.min_perfusion_rate, currentPerfusion - stepDec);
         actionType = 'REDUCE_PERFUSION';
-        reason = `High fouling risk index (${state.fouling_index.toFixed(1)}/100 >= ${foulingLimit.toFixed(1)}). Throttling perfusion rate to manage membrane load.`;
+        reason = `Membrane fouling index (${state.fouling_index.toFixed(1)}/100 near limit ${foulingLimit.toFixed(1)}). Throttling perfusion rate to manage membrane load.`;
       }
     } else if (state.nutrient_concentration < nutrientLimit) {
       if (currentPerfusion < config.max_perfusion_rate) {
@@ -788,7 +762,12 @@ export async function clientUpdateControlSettings(payload: {
 export async function clientRunScenarioComparison(payload?: any): Promise<ScenarioComparisonResponse> {
   const scenarioEngine = new ClientScenarioEngine();
   const cfg = payload?.config || (payload && !('preset' in payload) && !('fault' in payload) ? payload : undefined);
-  const fault = payload?.fault || null;
+  let fault = payload?.fault || null;
+  if (!fault && payload?.preset) {
+    if (DISTURBANCE_PRESETS[payload.preset]) {
+      fault = { ...DISTURBANCE_PRESETS[payload.preset] };
+    }
+  }
   return scenarioEngine.runComparison(cfg, fault);
 }
 

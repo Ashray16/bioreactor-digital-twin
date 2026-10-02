@@ -1,9 +1,26 @@
 import { Layers, Info } from 'lucide-react';
 import { SensitivityResponse } from '../../types/simulation';
+import { formatCellDensity, formatKineticRate } from '../../config/constants';
 
 interface TornadoChartProps {
   data: SensitivityResponse | null;
   loading?: boolean;
+}
+
+function formatParamNominal(value: number, unit: string): string {
+  if (unit.includes('cells/mL')) {
+    return formatCellDensity(value);
+  }
+  if (value < 1e-4) {
+    return `${formatKineticRate(value)} ${unit}`;
+  }
+  if (value >= 1.0) {
+    return `${value.toFixed(1)} ${unit}`;
+  }
+  if (value >= 0.01) {
+    return `${value.toFixed(3)} ${unit}`;
+  }
+  return `${value.toFixed(4)} ${unit}`;
 }
 
 export default function TornadoChart({ data, loading = false }: TornadoChartProps) {
@@ -31,9 +48,9 @@ export default function TornadoChart({ data, loading = false }: TornadoChartProp
       {/* Header Panel */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 border-b border-slate-100 pb-3">
         <div>
-          <h3 className="text-xs font-bold text-slate-900 uppercase tracking-wider flex items-center gap-2">
+          <h3 className="text-xs font-bold text-slate-900 flex items-center gap-2">
             <Layers className="w-4 h-4 text-blue-600" />
-            Parameter Sensitivity Analysis (Tornado Chart)
+            Parameter Sensitivity Analysis (OAT Tornado)
           </h3>
           <p className="text-[11px] text-slate-500 mt-0.5">
             One-at-a-time (OAT) local sensitivity: effect of ±{data.perturbation_pct}% variation on final VCC at 120 h
@@ -50,13 +67,13 @@ export default function TornadoChart({ data, loading = false }: TornadoChartProp
       <div className="space-y-3.5 pt-1 text-xs">
         {/* Scale Header */}
         <div className="flex items-center text-[10px] text-slate-600 font-mono border-b border-slate-100 pb-1">
-          <div className="w-1/3 font-semibold uppercase tracking-wider">Parameter (Symbol / Nominal)</div>
+          <div className="w-1/3 font-semibold">Parameter (Symbol / Nominal)</div>
           <div className="w-5/12 flex justify-between px-2 font-bold">
             <span className="text-rose-600">−20% Swing (ΔVCC)</span>
             <span className="text-slate-400">Baseline (0)</span>
             <span className="text-blue-600">+20% Swing (ΔVCC)</span>
           </div>
-          <div className="w-1/4 text-right font-semibold uppercase tracking-wider">Total Swing &amp; Share</div>
+          <div className="w-1/4 text-right font-semibold">Total Swing &amp; Share</div>
         </div>
 
         {data.parameters.map((p, idx) => {
@@ -76,7 +93,7 @@ export default function TornadoChart({ data, loading = false }: TornadoChartProp
                     <span className="font-mono text-blue-700 font-bold text-[11px]">({p.symbol})</span>
                   </div>
                   <div className="text-[10px] text-slate-600 font-mono">
-                    Nominal: {p.nominal_value >= 0.01 ? p.nominal_value.toFixed(3) : p.nominal_value.toExponential(1)} {p.unit}
+                    Nominal: {formatParamNominal(p.nominal_value, p.unit)}
                   </div>
                 </div>
 

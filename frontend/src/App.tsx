@@ -66,32 +66,39 @@ export default function App() {
     document.title = titles[activeTab] || 'Bioprocess Digital Twin | CHO Perfusion';
   }, [activeTab]);
 
-  // Initialize simulation engine baseline
-  const initEngine = async (customConfig?: BioreactorConfig) => {
+  // Initialize simulation engine baseline and auto-load nominal demonstration run
+  const initEngine = async (customConfig?: BioreactorConfig, startFresh = false) => {
     setInitError(null);
     try {
       const defaultConfig = customConfig || (await fetchDefaultConfig());
       setConfig(defaultConfig);
 
-      const initialState = await startSimulation(defaultConfig);
-      setState(initialState);
-      setHistory([
-        {
-          time: 0.0,
-          viable_cell_density: initialState.viable_cell_density,
-          nonviable_cell_density: initialState.nonviable_cell_density,
-          cell_viability: initialState.cell_viability,
-          nutrient_concentration: initialState.nutrient_concentration,
-          metabolite_concentration: initialState.metabolite_concentration,
-          product_concentration: initialState.product_concentration,
-          perfusion_rate: initialState.perfusion_rate,
-          fouling_index: initialState.fouling_index,
-          controller_enabled: initialState.controller_enabled,
-          active_fault: initialState.active_fault,
-        },
-      ]);
-      if (customConfig) {
-        showSuccess('Digital Twin parameters updated and re-initialized.');
+      if (startFresh) {
+        const initialState = await startSimulation(defaultConfig);
+        setState(initialState);
+        setHistory([
+          {
+            time: 0.0,
+            viable_cell_density: initialState.viable_cell_density,
+            nonviable_cell_density: initialState.nonviable_cell_density,
+            cell_viability: initialState.cell_viability,
+            nutrient_concentration: initialState.nutrient_concentration,
+            metabolite_concentration: initialState.metabolite_concentration,
+            product_concentration: initialState.product_concentration,
+            perfusion_rate: initialState.perfusion_rate,
+            fouling_index: initialState.fouling_index,
+            controller_enabled: initialState.controller_enabled,
+            active_fault: initialState.active_fault,
+          },
+        ]);
+        if (customConfig) {
+          showSuccess('Digital Twin parameters updated and re-initialized.');
+        }
+      } else {
+        // Auto-load finished 240-hour demo run so first-time visitors immediately see rich trajectories
+        const fullRun = await runFullSimulation(defaultConfig);
+        setState(fullRun.current_state);
+        setHistory(fullRun.history);
       }
     } catch (err: any) {
       console.error('Failed to initialize simulation engine:', err);
@@ -159,9 +166,23 @@ export default function App() {
 
   const handleReset = async () => {
     setIsRunning(false);
+    setActiveFault(null);
     if (config) {
-      await initEngine(config);
-      showInfo('Digital Twin reset to initial baseline state (t = 0.0 h).');
+      await initEngine(config, true);
+      showInfo('Digital Twin reset to inoculation state (t = 0.0 h).');
+    }
+  };
+
+  const handleLoadExampleRun = async () => {
+    setIsRunning(false);
+    try {
+      const fullRun = await runFullSimulation(config || undefined);
+      setState(fullRun.current_state);
+      setHistory(fullRun.history);
+      showSuccess('Loaded 240-hour nominal digital twin demo trajectory.');
+    } catch (err: any) {
+      console.error('Failed to load example run:', err);
+      showError('Failed to load demo trajectory.');
     }
   };
 
@@ -172,7 +193,7 @@ export default function App() {
       const response = await runFullSimulation(config);
       setState(response.current_state);
       setHistory(response.history);
-      showSuccess('120 h simulation completed successfully.');
+      showSuccess('240 h simulation completed successfully.');
     } catch (err: any) {
       console.error('Failed to run full simulation:', err);
       showError('Failed to complete full simulation run.');
@@ -242,7 +263,7 @@ export default function App() {
   }
 
   return (
-    <div className="flex min-h-screen bg-[#F7F8FA] text-slate-900 font-sans selection:bg-blue-100 selection:text-blue-900">
+    <div className="flex h-screen bg-[#F7F8FA] text-slate-900 font-sans selection:bg-blue-100 selection:text-blue-900 overflow-hidden">
       {/* Persistent Left Navigation Sidebar + Mobile Drawer */}
       <Sidebar
         activeTab={activeTab}
@@ -256,7 +277,7 @@ export default function App() {
       />
 
       {/* Main Workspace Layout */}
-      <div className="flex-1 flex flex-col min-w-0 overflow-x-hidden">
+      <div className="flex-1 flex flex-col min-w-0 h-full overflow-hidden">
         <HeaderBar
           isRunning={isRunning}
           onTogglePlay={handleTogglePlay}
@@ -271,7 +292,7 @@ export default function App() {
           onToggleMobileNav={() => setIsMobileNavOpen((prev) => !prev)}
         />
 
-        <main className="flex-1 p-4 sm:p-6 space-y-4 max-w-[1600px] w-full mx-auto">
+        <main className="flex-1 overflow-y-auto p-4 sm:p-6 space-y-4 max-w-[1600px] w-full mx-auto">
           {/* 1. Overview Dashboard */}
           {activeTab === 'dashboard' && (
             <div className="space-y-4">
@@ -285,6 +306,7 @@ export default function App() {
                   end: activeFault.start_time + activeFault.duration,
                   label: `Injected Disturbance: ${activeFault.fault_type.replace(/_/g, ' ')}`,
                 } : null}
+                onLoadExampleRun={handleLoadExampleRun}
               />
               <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
                 <div className="lg:col-span-2">

@@ -11,6 +11,7 @@ import {
   Settings,
   AlertTriangle
 } from 'lucide-react';
+import { NOMINAL_FEED_GLUCOSE } from '../../config/constants';
 
 interface BioreactorDiagramProps {
   state: BioreactorState;
@@ -793,7 +794,7 @@ export default function BioreactorDiagram({ state, focus = 'flow', config, isRun
           <div className="mt-1.5 space-y-1 text-[10px] font-mono text-slate-650 border-t border-slate-100 pt-1.5">
             <div className="flex justify-between">
               <span>Glucose Feed:</span>
-              <span className="text-emerald-705 font-bold">10.0 g/L</span>
+              <span className="text-emerald-705 font-bold">{(config?.feed_nutrient_concentration ?? NOMINAL_FEED_GLUCOSE).toFixed(1)} g/L</span>
             </div>
             <div className="flex justify-between">
               <span>Feed Rate:</span>
@@ -805,7 +806,7 @@ export default function BioreactorDiagram({ state, focus = 'flow', config, isRun
           <div className="absolute bottom-full left-0 mb-2 hidden group-hover:block bg-slate-900/95 backdrop-blur-xs text-white p-3 rounded-lg text-xs w-60 z-30 shadow-md border border-slate-700 transition">
             <div className="font-bold text-emerald-400 pb-1 border-b border-slate-700 mb-1">Media Feed Inlet</div>
             <p className="text-[10px] leading-relaxed text-slate-300">
-              Continuously replenishes glucose substrates ({config?.feed_nutrient_concentration ?? 10.0} g/L) to prevent cellular starving.
+              Continuously replenishes glucose substrates ({(config?.feed_nutrient_concentration ?? NOMINAL_FEED_GLUCOSE).toFixed(1)} g/L) to prevent cellular starving.
             </p>
             {faultEffects.nutrient && (
               <div className="text-[10px] text-amber-400 font-bold mt-2">
@@ -1003,7 +1004,7 @@ export default function BioreactorDiagram({ state, focus = 'flow', config, isRun
           </div>
           <h4 className="text-xs font-bold text-slate-900">Fresh Media Feed Tank</h4>
           <div className="text-[11px] text-slate-650 font-mono">
-            Glucose Feed: <span className="text-emerald-700 font-bold">10.0 g/L</span>
+            Glucose Feed: <span className="text-emerald-700 font-bold">{(config?.feed_nutrient_concentration ?? NOMINAL_FEED_GLUCOSE).toFixed(1)} g/L</span>
           </div>
           <div className="text-[11px] text-slate-655 font-mono">
             Perfusion Rate: <span className="text-blue-600 font-bold">{state.perfusion_rate.toFixed(2)} VVD</span>
@@ -1120,7 +1121,7 @@ export default function BioreactorDiagram({ state, focus = 'flow', config, isRun
                 <div className="flex justify-between">
                   <span>Glucose Feed Inflow Rate:</span>
                   <span className="text-emerald-750 font-bold">
-                    +{((state.perfusion_rate / 24.0) * (config?.feed_nutrient_concentration ?? 10.0) * state.reactor_volume).toFixed(3)} g/h
+                    +{((state.perfusion_rate / 24.0) * (config?.feed_nutrient_concentration ?? NOMINAL_FEED_GLUCOSE) * state.reactor_volume).toFixed(3)} g/h
                   </span>
                 </div>
                 <div className="flex justify-between">
@@ -1138,7 +1139,7 @@ export default function BioreactorDiagram({ state, focus = 'flow', config, isRun
                 <div className="flex justify-between border-t border-slate-100 pt-2 font-sans font-bold text-slate-800 text-xs">
                   <span>Net Accumulation Rate:</span>
                   {(() => {
-                    const inflow = (state.perfusion_rate / 24.0) * (config?.feed_nutrient_concentration ?? 10.0) * state.reactor_volume;
+                    const inflow = (state.perfusion_rate / 24.0) * (config?.feed_nutrient_concentration ?? NOMINAL_FEED_GLUCOSE) * state.reactor_volume;
                     const outflow = (state.perfusion_rate / 24.0) * state.nutrient_concentration * state.reactor_volume;
                     const consumption = (config?.cell_nutrient_consumption_rate ?? 0.005) * (state.viable_cell_density / 1e6) * state.reactor_volume;
                     const net = inflow - outflow - consumption;

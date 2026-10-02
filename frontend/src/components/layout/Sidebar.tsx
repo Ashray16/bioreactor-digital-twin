@@ -288,6 +288,16 @@ export default function Sidebar({
                           {item.shortcut}
                         </span>
                       )}
+
+                      {/* Tooltip bubble when collapsed */}
+                      {isCollapsed && (
+                        <div className="absolute left-full ml-2 px-2.5 py-1 bg-slate-900 text-white text-[11px] font-medium rounded-md shadow-lg whitespace-nowrap opacity-0 pointer-events-none group-hover:opacity-100 transition-opacity z-50 flex items-center gap-1.5">
+                          <span>{item.label}</span>
+                          <span className="text-[9px] font-mono text-slate-400 bg-slate-800 px-1 py-0.5 rounded">
+                            {item.shortcut}
+                          </span>
+                        </div>
+                      )}
                     </button>
                   );
                 })}
@@ -303,7 +313,7 @@ export default function Sidebar({
               title="Parameters & Specs (Press 8)"
               className={`w-full flex items-center ${
                 isCollapsed ? 'justify-center px-0 py-2' : 'gap-2.5 px-2.5 py-1.5'
-              } rounded-md text-xs font-medium text-slate-600 hover:text-slate-900 hover:bg-slate-100/60 transition-colors group cursor-pointer`}
+              } rounded-md text-xs font-medium text-slate-600 hover:text-slate-900 hover:bg-slate-100/60 transition-colors group cursor-pointer relative`}
             >
               <BookOpen className="w-4 h-4 text-slate-400 group-hover:text-slate-600 shrink-0 stroke-[1.75]" />
               {!isCollapsed && (
@@ -313,6 +323,14 @@ export default function Sidebar({
                     8
                   </span>
                 </>
+              )}
+              {isCollapsed && (
+                <div className="absolute left-full ml-2 px-2.5 py-1 bg-slate-900 text-white text-[11px] font-medium rounded-md shadow-lg whitespace-nowrap opacity-0 pointer-events-none group-hover:opacity-100 transition-opacity z-50 flex items-center gap-1.5">
+                  <span>Parameters &amp; Specs</span>
+                  <span className="text-[9px] font-mono text-slate-400 bg-slate-800 px-1 py-0.5 rounded">
+                    8
+                  </span>
+                </div>
               )}
             </button>
           </div>

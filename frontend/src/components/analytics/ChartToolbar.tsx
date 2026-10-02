@@ -77,11 +77,11 @@ export default function ChartToolbar({
           aria-label={showEvents ? 'Hide process event markers on chart' : 'Show process event markers on chart'}
           className={`flex items-center gap-1 px-2.5 py-1 rounded border transition font-bold ${
             showEvents
-              ? 'bg-slate-800 border-slate-700 text-white'
+              ? 'bg-blue-50 border-blue-200 text-blue-700'
               : 'bg-white border-slate-200 text-slate-600 hover:bg-slate-50'
           }`}
         >
-          {showEvents ? <Bell className="w-3.5 h-3.5" /> : <BellOff className="w-3.5 h-3.5 text-slate-500" />}
+          {showEvents ? <Bell className="w-3.5 h-3.5 text-blue-600" /> : <BellOff className="w-3.5 h-3.5 text-slate-400" />}
           <span>Events</span>
         </button>
 

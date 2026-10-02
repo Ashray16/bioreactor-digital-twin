@@ -3,6 +3,7 @@ import { Zap, CheckCircle2, ChevronRight, ArrowRight } from 'lucide-react';
 import { injectProcessFault } from '../../services/api';
 import { useToast } from '../../context/ToastContext';
 import { FaultConfig } from '../../types/simulation';
+import { NOMINAL_FEED_GLUCOSE, GLUCOSE_THRESHOLD_LOW } from '../../config/constants';
 
 interface FaultInjectionPanelProps {
   onRefreshState: () => void;
@@ -70,7 +71,7 @@ export default function FaultInjectionPanel({
       title: 'Nutrient Feed Reduction',
       shortDesc: 'Media glucose supply depletion simulating feed pump failure or media lot exhaustion.',
       getMapping: (sev: number) =>
-        `Severity ${(sev * 100).toFixed(0)}% = ${(sev * 95).toFixed(0)}% feed glucose drop (delivers ${(7.0 * Math.max(0.05, 1 - 0.95 * sev)).toFixed(2)} g/L vs 7.0 g/L nominal)`,
+        `Severity ${(sev * 100).toFixed(0)}% = ${(sev * 95).toFixed(0)}% feed glucose drop (delivers ${(NOMINAL_FEED_GLUCOSE * Math.max(0.05, 1 - 0.95 * sev)).toFixed(2)} g/L vs ${NOMINAL_FEED_GLUCOSE.toFixed(1)} g/L nominal)`,
     },
     {
       id: 'perfusion_disruption' as const,
@@ -84,7 +85,7 @@ export default function FaultInjectionPanel({
       title: 'Cell Mortality Surge',
       shortDesc: 'Acute cytotoxic shock, viral contamination, or hydrodynamic shear stress.',
       getMapping: (sev: number) =>
-        `Severity ${(sev * 100).toFixed(0)}% = +${(0.03 * sev).toFixed(3)} h⁻¹ added to baseline mortality rate (+${(sev * 300).toFixed(0)}% increase)`,
+        `Severity ${(sev * 100).toFixed(0)}% = +${(0.03 * sev).toFixed(3)} h⁻¹ added to baseline mortality rate (+${Math.round(((0.03 * sev) / 0.002) * 100)}% increase)`,
     },
     {
       id: 'fouling_surge' as const,
@@ -102,7 +103,7 @@ export default function FaultInjectionPanel({
     dt: number
   ): CausalStep[] => {
     const tEnd = (t0 + dt).toFixed(0);
-    const baselineFeed = 7.0; // g/L
+    const baselineFeed = NOMINAL_FEED_GLUCOSE; // g/L
     const baselinePerfusion = 0.4; // VVD
 
     switch (fault) {
@@ -121,7 +122,7 @@ export default function FaultInjectionPanel({
           {
             stage: 'Vessel Impact',
             title: 'Glucose Concentration Drifts Down',
-            detail: `Dense cells (~6.5M/mL) rapidly consume vessel glucose, dropping below 1.5 g/L toward ${vesselMinGlucose} g/L.`,
+            detail: `Dense cells (~6.5M/mL) rapidly consume vessel glucose, dropping below ${GLUCOSE_THRESHOLD_LOW.toFixed(1)} g/L toward ${vesselMinGlucose} g/L.`,
           },
           {
             stage: 'Twin Model',
@@ -131,7 +132,7 @@ export default function FaultInjectionPanel({
           {
             stage: 'Controller Action',
             title: 'Adaptive Perfusion Ramp',
-            detail: `Glucose < 1.5 g/L threshold trips closed-loop controller: ramps perfusion D from ${baselinePerfusion.toFixed(1)} up toward 4.0 VVD.`,
+            detail: `Glucose < ${GLUCOSE_THRESHOLD_LOW.toFixed(1)} g/L threshold trips closed-loop controller: ramps perfusion D from ${baselinePerfusion.toFixed(1)} up toward 4.0 VVD.`,
           },
           {
             stage: 'Bioprocess Outcome',
