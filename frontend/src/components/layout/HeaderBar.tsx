@@ -8,8 +8,9 @@ import {
   Layers,
   Zap,
   Menu,
-  ChevronDown
+  ChevronDown,
 } from 'lucide-react';
+import { isUsingClientFallback } from '../../services/api';
 
 interface HeaderBarProps {
   isRunning: boolean;
@@ -106,6 +107,24 @@ export default function HeaderBar({
             <div className="px-2.5 py-1 rounded-md bg-slate-50 border border-slate-200 text-xs">
               <span className="text-slate-500">t = </span>
               <span className="font-bold text-blue-700 font-mono">{simulationTime.toFixed(1)} h</span>
+            </div>
+
+            <div
+              className={`hidden md:flex items-center gap-1.5 px-2.5 py-1 rounded-md border text-xs ${
+                isUsingClientFallback()
+                  ? 'bg-blue-50 border-blue-200 text-blue-800'
+                  : 'bg-emerald-50 border-emerald-200 text-emerald-800'
+              }`}
+              title={
+                isUsingClientFallback()
+                  ? 'Running high-fidelity Runge-Kutta 4th-order bioprocess simulation directly in browser (standalone mode)'
+                  : 'Connected to live FastAPI bioprocess backend'
+              }
+            >
+              <Zap className="w-3 h-3 text-blue-600" />
+              <span className="font-medium text-[11px]">
+                {isUsingClientFallback() ? 'In-Browser Engine' : 'Cloud Backend'}
+              </span>
             </div>
           </div>
         </div>
